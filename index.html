@@ -461,14 +461,14 @@
     <section id="market-view" class="view">
       <div class="view-head"><div><h2>주식 마켓</h2><p>한국·미국 상장 주식을 검색하고 가상으로 매매해보세요.</p></div><span class="data-chip">종목 시세</span></div>
       <section class="card" style="margin-bottom:15px">
-        <div class="card-heading"><div><h2 class="card-title">전체 종목 검색</h2><p class="card-description">종목명이나 티커로 한국·미국 주식을 찾으세요.</p></div><span class="tiny-label" id="stock-catalog-count">목록 로딩 전</span></div>
-        <div class="stock-search"><input id="stock-search" type="search" maxlength="60" placeholder="가상 회사명 또는 티커 검색 · 예: 미르에너지, Lumen Orbit" autocomplete="off" aria-label="가상 회사명 또는 티커 검색"><select id="stock-search-market" aria-label="검색 시장"><option value="ALL">전체 가상 회사</option><option value="KR">한국 가상 주식</option><option value="US">미국 가상 주식</option></select></div>
-        <p class="stock-search-status" id="stock-search-status" role="status">종목명이나 티커를 입력하세요. 장이 닫혀 있으면 최근 종가를 불러오며 주문은 잠깁니다.</p>
+        <div class="card-heading"><div><h2 class="card-title">전체 종목 검색</h2><p class="card-description">24개 가상 회사 중 이름이나 티커로 찾아보세요.</p></div><span class="tiny-label" id="stock-catalog-count">목록 로딩 전</span></div>
+        <div class="stock-search"><input id="stock-search" type="search" maxlength="60" placeholder="가상 회사명 또는 티커 검색 · 예: 미르에너지, V2U001" autocomplete="off" aria-label="가상 회사명 또는 티커 검색"><select id="stock-search-market" aria-label="검색 시장"><option value="ALL">전체 가상 회사</option><option value="KR">한국 가상 주식</option><option value="US">미국 가상 주식</option></select></div>
+        <p class="stock-search-status" id="stock-search-status" role="status">한국·미국 가상 종목 24개를 검색할 수 있습니다.</p>
         <div class="stock-results" id="stock-search-results" aria-live="polite"></div>
       </section>
       <div class="layout">
         <section class="card">
-          <div class="card-heading"><div><h2 class="card-title">리그 인기 종목</h2><p class="card-description">참가자들이 보유하거나 검색한 종목을 만나보세요.</p></div><div class="market-tabs"><button class="active" data-market="ALL">전체</button><button data-market="KR">한국</button><button data-market="US">미국</button></div></div>
+          <div class="card-heading"><div><h2 class="card-title">가상 종목 24개</h2><p class="card-description">모든 가상 회사의 시세를 보고 보유·검색 순으로 정렬하세요.</p></div><div class="market-tabs"><button class="active" data-market="ALL">전체</button><button data-market="KR">한국</button><button data-market="US">미국</button></div></div>
           <div class="market-tabs popularity-tabs" aria-label="인기 종목 정렬"><button class="active" type="button" data-popularity="holders" aria-pressed="true">많이 보유한</button><button type="button" data-popularity="searches" aria-pressed="false">많이 검색한</button></div>
             <p class="popularity-hint"></p><div class="empty popularity-empty" hidden></div>
           <div class="table-scroll"><table class="market-table"><thead><tr><th>종목</th><th class="price-heading">시세</th><th>변동률</th><th>시장</th><th></th></tr></thead><tbody id="market-rows-secondary"></tbody></table></div>
@@ -548,21 +548,42 @@
       const STARTING_CAPITAL = 10000000;
       const COMMON_SCHOOLS = ["가천대학교","가톨릭대학교","강남대학교","강릉원주대학교","강원대학교","건국대학교","건양대학교","경기대학교","경남대학교","경북대학교","경상국립대학교","경성대학교","경운대학교","경일대학교","경희대학교","계명대학교","고려대학교","공주대학교","광운대학교","광주과학기술원","광주대학교","국민대학교","군산대학교","금오공과대학교","꽃동네대학교","나사렛대학교","남서울대학교","단국대학교","대구가톨릭대학교","대구대학교","대구경북과학기술원","대전대학교","덕성여자대학교","동국대학교","동덕여자대학교","동명대학교","동서대학교","동아대학교","동의대학교","명지대학교","목원대학교","목포대학교","목포해양대학교","배재대학교","백석대학교","부경대학교","부산가톨릭대학교","부산대학교","부산외국어대학교","삼육대학교","상명대학교","서강대학교","서경대학교","서울과학기술대학교","서울교육대학교","서울대학교","서울시립대학교","서울여자대학교","선문대학교","성결대학교","성공회대학교","성균관대학교","성신여자대학교","세명대학교","세종대학교","수원대학교","숙명여자대학교","순천대학교","순천향대학교","숭실대학교","신라대학교","아주대학교","안동대학교","연세대학교","영남대학교","우석대학교","우송대학교","울산대학교","원광대학교","을지대학교","이화여자대학교","인제대학교","인천대학교","인하대학교","전남대학교","전북대학교","제주대학교","조선대학교","중앙대학교","중부대학교","중원대학교","창원대학교","청주대학교","초당대학교","충남대학교","충북대학교","포항공과대학교","한국공학대학교","한국교원대학교","한국교통대학교","한국기술교육대학교","한국외국어대학교","한국항공대학교","한국해양대학교","한경국립대학교","한남대학교","한동대학교","한림대학교","한밭대학교","한서대학교","한성대학교","한세대학교","한양대학교","협성대학교","호남대학교","호서대학교","홍익대학교","경희사이버대학교","고려사이버대학교","글로벌사이버대학교","대구사이버대학교","부산디지털대학교","사이버한국외국어대학교","서울디지털대학교","서울사이버대학교","세종사이버대학교","숭실사이버대학교","원광디지털대학교","한국방송통신대학교","한양사이버대학교","경기과학기술대학교","경남정보대학교","대구공업대학교","대전보건대학교","동양미래대학교","명지전문대학","배화여자대학교","부산경상대학교","부산여자대학교","삼육보건대학교","서울예술대학교","서일대학교","숭의여자대학교","영남이공대학교","영진전문대학교","인덕대학교","인하공업전문대학","한국폴리텍대학교","한양여자대학교","한국예술종합학교"];
       const QUOTE_WORKER_URL = window.UNIVERSE2_CONFIG?.quoteWorkerUrl || "";
-      const DEFAULT_STOCK_SYMBOLS = new Set(["V2K001","V2K002","V2K003","V2K004","V2U001","V2U002","V2U003","V2U004"]);
-      const stockCatalog = { KR:null, US:null };
-      const stockCatalogPromises = { KR:null, US:null };
+      const VIRTUAL_STOCKS = [
+        { symbol:"V2K001", market:"KR", currency:"KRW", exchange:"KOSPI", exchange_name:"KOSPI", name:"미르에너지", english_name:"Mir Energy", price:48200, badge:"미르" },
+        { symbol:"V2K002", market:"KR", currency:"KRW", exchange:"KOSDAQ", exchange_name:"KOSDAQ", name:"별빛바이오", english_name:"Starlight Bio", price:31750, badge:"별빛" },
+        { symbol:"V2K003", market:"KR", currency:"KRW", exchange:"KOSPI", exchange_name:"KOSPI", name:"달무리모빌리티", english_name:"Dalmoori Mobility", price:126000, badge:"달무리" },
+        { symbol:"V2K004", market:"KR", currency:"KRW", exchange:"KOSDAQ", exchange_name:"KOSDAQ", name:"청해로보틱스", english_name:"Cheonghae Robotics", price:76500, badge:"청해" },
+        { symbol:"V2K005", market:"KR", currency:"KRW", exchange:"KOSPI", exchange_name:"KOSPI", name:"온누리칩스", english_name:"Onnuri Chips", price:208000, badge:"온누리" },
+        { symbol:"V2K006", market:"KR", currency:"KRW", exchange:"KOSPI", exchange_name:"KOSPI", name:"새벽푸드", english_name:"Dawn Foods", price:28400, badge:"새벽" },
+        { symbol:"V2K007", market:"KR", currency:"KRW", exchange:"KOSDAQ", exchange_name:"KOSDAQ", name:"파도물류", english_name:"Pado Logistics", price:41300, badge:"파도" },
+        { symbol:"V2K008", market:"KR", currency:"KRW", exchange:"KOSPI", exchange_name:"KOSPI", name:"나래항공", english_name:"Narae Airlines", price:19200, badge:"나래" },
+        { symbol:"V2K009", market:"KR", currency:"KRW", exchange:"KOSPI", exchange_name:"KOSPI", name:"한울건설", english_name:"Hanul Construction", price:55100, badge:"한울" },
+        { symbol:"V2K010", market:"KR", currency:"KRW", exchange:"KOSDAQ", exchange_name:"KOSDAQ", name:"자운클라우드", english_name:"Jaun Cloud", price:91700, badge:"자운" },
+        { symbol:"V2K011", market:"KR", currency:"KRW", exchange:"KOSDAQ", exchange_name:"KOSDAQ", name:"모래시계게임즈", english_name:"Hourglass Games", price:36200, badge:"모래" },
+        { symbol:"V2K012", market:"KR", currency:"KRW", exchange:"KOSPI", exchange_name:"KOSPI", name:"무지개소재", english_name:"Rainbow Materials", price:68400, badge:"무지개" },
+        { symbol:"V2U001", market:"US", currency:"USD", exchange:"NASDAQ", exchange_name:"NASDAQ", name:"Lumen Orbit", english_name:"Lumen Orbit", price:84.2, badge:"LO" },
+        { symbol:"V2U002", market:"US", currency:"USD", exchange:"NASDAQ", exchange_name:"NASDAQ", name:"Northstar Bio", english_name:"Northstar Bio", price:42.75, badge:"NB" },
+        { symbol:"V2U003", market:"US", currency:"USD", exchange:"NYSE", exchange_name:"NYSE", name:"Copperfield Mobility", english_name:"Copperfield Mobility", price:136.4, badge:"CM" },
+        { symbol:"V2U004", market:"US", currency:"USD", exchange:"NASDAQ", exchange_name:"NASDAQ", name:"Bluehaven Robotics", english_name:"Bluehaven Robotics", price:67.3, badge:"BR" },
+        { symbol:"V2U005", market:"US", currency:"USD", exchange:"NASDAQ", exchange_name:"NASDAQ", name:"Juniper Cloud", english_name:"Juniper Cloud", price:218.6, badge:"JC" },
+        { symbol:"V2U006", market:"US", currency:"USD", exchange:"NYSE", exchange_name:"NYSE", name:"Redwood Foods", english_name:"Redwood Foods", price:31.8, badge:"RF" },
+        { symbol:"V2U007", market:"US", currency:"USD", exchange:"NYSE", exchange_name:"NYSE", name:"Tidal Freight", english_name:"Tidal Freight", price:58.55, badge:"TF" },
+        { symbol:"V2U008", market:"US", currency:"USD", exchange:"NASDAQ", exchange_name:"NASDAQ", name:"Aster Aerospace", english_name:"Aster Aerospace", price:103.25, badge:"AA" },
+        { symbol:"V2U009", market:"US", currency:"USD", exchange:"NYSE", exchange_name:"NYSE", name:"Cinderstone Homes", english_name:"Cinderstone Homes", price:76.9, badge:"CH" },
+        { symbol:"V2U010", market:"US", currency:"USD", exchange:"NASDAQ", exchange_name:"NASDAQ", name:"Daybreak Games", english_name:"Daybreak Games", price:24.6, badge:"DG" },
+        { symbol:"V2U011", market:"US", currency:"USD", exchange:"NYSE", exchange_name:"NYSE", name:"Mosaic Materials", english_name:"Mosaic Materials", price:151.7, badge:"MM" },
+        { symbol:"V2U012", market:"US", currency:"USD", exchange:"NASDAQ", exchange_name:"NASDAQ", name:"Silverline Transit", english_name:"Silverline Transit", price:45.3, badge:"ST" }
+      ];
+      const DEFAULT_STOCK_SYMBOLS = new Set(VIRTUAL_STOCKS.map(item => item.symbol));
+      const stockCatalog = {
+        KR:VIRTUAL_STOCKS.filter(item => item.market === "KR"),
+        US:VIRTUAL_STOCKS.filter(item => item.market === "US"),
+      };
       const pinnedSearchSymbols = new Set();
       let USDKRW = 1380;
-      const assets = [
-        { symbol:"V2K001", code:"KOSPI", name:"미르에너지", market:"KR", currency:"KRW", price:48200, change:0, badge:"미르", freshness:"demo", tradable:false, asOf:null },
-        { symbol:"V2K002", code:"KOSDAQ", name:"별빛바이오", market:"KR", currency:"KRW", price:31750, change:0, badge:"별빛", freshness:"demo", tradable:false, asOf:null },
-        { symbol:"V2K003", code:"KOSPI", name:"달무리모빌리티", market:"KR", currency:"KRW", price:126000, change:0, badge:"달무리", freshness:"demo", tradable:false, asOf:null },
-        { symbol:"V2K004", code:"KOSDAQ", name:"청해로보틱스", market:"KR", currency:"KRW", price:76500, change:0, badge:"청해", freshness:"demo", tradable:false, asOf:null },
-        { symbol:"V2U001", code:"NASDAQ", name:"Lumen Orbit", market:"US", currency:"USD", price:84.2, change:0, badge:"LO", freshness:"demo", tradable:false, asOf:null },
-        { symbol:"V2U002", code:"NASDAQ", name:"Northstar Bio", market:"US", currency:"USD", price:42.75, change:0, badge:"NB", freshness:"demo", tradable:false, asOf:null },
-        { symbol:"V2U003", code:"NYSE", name:"Copperfield Mobility", market:"US", currency:"USD", price:136.4, change:0, badge:"CM", freshness:"demo", tradable:false, asOf:null },
-        { symbol:"V2U004", code:"NASDAQ", name:"Bluehaven Robotics", market:"US", currency:"USD", price:67.3, change:0, badge:"BR", freshness:"demo", tradable:false, asOf:null }
-      ];
+      const assets = VIRTUAL_STOCKS.map(item => ({
+        ...item, code:item.exchange_name, change:0, freshness:"demo", tradable:false, asOf:null,
+      }));
       let state = { profile:null, wallet:{krw:STARTING_CAPITAL,usd:0}, trades:[], holdings:[], loan:null, joinedAt:null };
       let actionBusy = false, editingProfile = false, overviewRequest = null, connectionMessage = "", fxAsOf = null;
       let selectedAsset = assets[0];
@@ -640,37 +661,11 @@
       }
       async function ensureStockCatalog(market) {
         const markets = market === "ALL" ? ["KR","US"] : [market];
-        const manifestResponse = await fetch(new URL("./data/stocks-manifest.json", document.baseURI), { cache:"force-cache" });
-        if (!manifestResponse.ok) throw new Error("종목 목록을 불러오지 못했어요.");
-        const manifest = await manifestResponse.json();
-        const loaded = await Promise.all(markets.map(async key => {
-          if (stockCatalog[key]) return stockCatalog[key];
-          if (!stockCatalogPromises[key]) {
-            stockCatalogPromises[key] = (async () => {
-              const files = manifest.markets?.[key]?.files || [];
-              const parts = await Promise.all(files.map(async file => {
-                const response = await fetch(new URL("./data/" + file, document.baseURI), { cache:"force-cache" });
-                if (!response.ok) throw new Error(key + " 종목 목록을 불러오지 못했어요.");
-                const lines = (await response.text()).trim().split(/\r?\n/);
-                if (lines.length < 2) return [];
-                const headers = lines[0].split("\t");
-                return lines.slice(1).map(line => {
-                  const values = line.split("\t");
-                  return Object.fromEntries(headers.map((header,index) => [header,values[index] || ""]));
-                });
-              }));
-              stockCatalog[key] = parts.flat();
-              return stockCatalog[key];
-            })().catch(error => { stockCatalogPromises[key] = null; throw error; });
-          }
-          return stockCatalogPromises[key];
-        }));
-        const counts = ["KR","US"].map(key => {
-          const count = stockCatalog[key]?.length || manifest.markets?.[key]?.count || 0;
-          return (key === "KR" ? "한국 " : "미국 ") + count.toLocaleString("ko-KR") + "개";
-        });
+        const counts = ["KR","US"].map(key =>
+          (key === "KR" ? "한국 " : "미국 ") + stockCatalog[key].length.toLocaleString("ko-KR") + "개"
+        );
         document.getElementById("stock-catalog-count").textContent = counts.join(" · ");
-        return loaded.flat();
+        return markets.flatMap(key => stockCatalog[key] || []);
       }
       function scheduleStockSearch() {
         clearTimeout(stockSearchTimer);
@@ -686,28 +681,28 @@
         const generation = ++stockSearchGeneration;
         if (!query) {
           results.replaceChildren();
-          status.textContent = "종목명이나 티커를 입력하세요. 장이 닫혀 있으면 최근 종가를 불러오며 주문은 잠깁니다.";
+          const all = await ensureStockCatalog(market);
+          status.textContent = all.length + "개 가상 종목에서 회사명이나 티커를 검색하세요.";
           return;
         }
-        status.textContent = "전체 종목 목록에서 검색 중…";
+        status.textContent = "가상 종목 목록에서 검색 중…";
         try {
           const all = await ensureStockCatalog(market);
           if (generation !== stockSearchGeneration) return;
           const matched = all.filter(item =>
             item.symbol.toLocaleLowerCase("en-US").includes(query) ||
             item.name.toLocaleLowerCase("ko-KR").includes(query) ||
-            item.english_name.toLocaleLowerCase("en-US").includes(query)
+            String(item.english_name || "").toLocaleLowerCase("en-US").includes(query)
           );
           matched.sort((a,b) => {
             const score = item => item.symbol.toLocaleLowerCase("en-US") === query ? 0 :
-              item.name.toLocaleLowerCase("ko-KR").startsWith(query) || item.english_name.toLocaleLowerCase("en-US").startsWith(query) ? 1 : 2;
+              item.name.toLocaleLowerCase("ko-KR").startsWith(query) || String(item.english_name || "").toLocaleLowerCase("en-US").startsWith(query) ? 1 : 2;
             return score(a)-score(b) || a.name.localeCompare(b.name,"ko");
           });
-          const shown = matched.slice(0,25);
           status.textContent = matched.length
-            ? matched.length + "개 검색됨 · 먼저 25개를 표시합니다. 선택하면 현재가를 불러옵니다."
-            : "검색 결과가 없습니다. 종목명이나 티커를 다시 확인하세요.";
-          results.innerHTML = shown.map(item =>
+            ? matched.length + "개 검색됨 · 가상 종목을 선택해 현재가를 불러오세요."
+            : "검색 결과가 없습니다. 가상 회사명이나 티커를 확인해주세요.";
+          results.innerHTML = matched.map(item =>
             '<article class="stock-result"><div style="min-width:0"><div class="stock-result-name">' + escapeHTML(item.name) + '</div><div class="stock-result-meta">' +
             escapeHTML(item.exchange_name) + ' · ' + escapeHTML(item.symbol) + (item.english_name ? ' · ' + escapeHTML(item.english_name) : '') +
             '</div></div><button class="stock-result-action" type="button" data-quote-symbol="' + escapeHTML(item.symbol) + '" data-quote-market="' + escapeHTML(item.market) +
@@ -725,7 +720,7 @@
         } catch (error) {
           if (generation !== stockSearchGeneration) return;
           results.replaceChildren();
-          status.textContent = "종목 목록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.";
+          status.textContent = "가상 종목 목록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.";
         }
       }
       function registerQuoteAsset(quote, listing = null) {
@@ -961,31 +956,43 @@
         const tbody = document.getElementById(targetId);
         const field = activePopularity === "searches" ? "search_count" : "holder_count";
         const other = activePopularity === "searches" ? "holder_count" : "search_count";
-        const popular = (remoteSummary?.popular_stocks || [])
-          .filter(p => Number(p[field]) > 0 && (activeMarket === "ALL" || p.market === activeMarket))
+        const popularity = (remoteSummary?.popular_stocks || [])
+          .filter(item => activeMarket === "ALL" || item.market === activeMarket)
           .sort((a,b) => Number(b[field])-Number(a[field]) || Number(b[other])-Number(a[other]) || a.symbol.localeCompare(b.symbol));
-        const visible = popular.map(p => assets.find(a => a.symbol === p.symbol)).filter(Boolean);
+        const popularityBySymbol = new Map(popularity.map(item => [item.symbol,item]));
+        const popularAssets = popularity.map(item => assets.find(asset => asset.symbol === item.symbol)).filter(Boolean);
+        const allAssets = assets
+          .filter(asset => DEFAULT_STOCK_SYMBOLS.has(asset.symbol) && (activeMarket === "ALL" || asset.market === activeMarket))
+          .sort((a,b) =>
+            Number(popularityBySymbol.get(b.symbol)?.[field] || 0)-Number(popularityBySymbol.get(a.symbol)?.[field] || 0) ||
+            Number(popularityBySymbol.get(b.symbol)?.[other] || 0)-Number(popularityBySymbol.get(a.symbol)?.[other] || 0) ||
+            a.symbol.localeCompare(b.symbol)
+          );
+        const isPreview = targetId === "market-rows";
+        const visible = isPreview ? popularAssets : allAssets;
         const container = tbody.closest(".card");
         const empty = container?.querySelector(".popularity-empty");
         if (empty) {
           empty.hidden = visible.length > 0;
-          empty.textContent = !remoteSummary ? "인기 종목을 불러오고 있어요." : !Array.isArray(remoteSummary.popular_stocks)
-            ? "인기 종목을 잠시 불러오지 못했어요. 전체 종목 검색을 이용해주세요."
-            : activePopularity === "holders" ? "아직 보유 중인 종목이 없어요. 많이 검색한 종목을 보거나 직접 검색해보세요."
-            : "최근 검색된 종목이 없어요. 전체 종목 검색에서 첫 종목을 찾아보세요.";
+          empty.textContent = !remoteSummary ? "가상 종목을 불러오고 있어요." : !Array.isArray(remoteSummary.popular_stocks)
+            ? "인기 정보를 잠시 불러오지 못했어요."
+            : activePopularity === "holders" ? "아직 보유 중인 종목이 없어요."
+            : "최근 검색된 종목이 없어요.";
         }
         const table = tbody.closest(".table-scroll");
         if (table) table.hidden = !visible.length;
         tbody.replaceChildren();
-        (targetId === "market-rows" ? visible.slice(0,4) : visible.slice(0,20)).forEach(asset => {
+        (isPreview ? visible.slice(0,4) : visible).forEach(asset => {
           const tr = document.createElement("tr");
           const changeClass = signedClass(asset.change);
           const orderDisabled = !asset.tradable || quoteExpired(asset);
-          tr.innerHTML = '<td><div class="asset"><span class="asset-badge">' + escapeHTML(asset.badge) + '</span><span><span class="asset-name">' + escapeHTML(asset.name) + '</span><span class="asset-meta">' + escapeHTML(asset.symbol) + ' · ' + asset.code + '</span><span class="asset-popularity">' + (popular.find(p => p.symbol === asset.symbol)?.[field] || 0).toLocaleString("ko-KR") + (activePopularity === "searches" ? '명 검색 · 최근 7일' : '명 보유') + '</span></span></div></td><td class="quote-price">' + displayPrice(asset) + '<span class="quote-context">' + escapeHTML(quoteContext(asset)) + '</span></td><td class="' + changeClass + '">' + formatReturn(asset.change) + '</td><td>' + (asset.market === "KR" ? "한국" : "미국") + '</td><td><button class="table-action" data-symbol="' + asset.symbol + '"' + (orderDisabled ? ' disabled title="장 마감 참고 가격은 주문할 수 없습니다."' : '') + '>주문</button></td>';
+          const counts = popularityBySymbol.get(asset.symbol) || {};
+          const popularityCount = Number(counts[field] || 0).toLocaleString("ko-KR");
+          tr.innerHTML = '<td><div class="asset"><span class="asset-badge">' + escapeHTML(asset.badge) + '</span><span><span class="asset-name">' + escapeHTML(asset.name) + '</span><span class="asset-meta">' + escapeHTML(asset.symbol) + ' · ' + escapeHTML(asset.code) + '</span><span class="asset-popularity">' + popularityCount + (activePopularity === "searches" ? '명 검색 · 최근 7일' : '명 보유') + '</span></span></div></td><td class="quote-price">' + displayPrice(asset) + '<span class="quote-context">' + escapeHTML(quoteContext(asset)) + '</span></td><td class="' + changeClass + '">' + formatReturn(asset.change) + '</td><td>' + (asset.market === "KR" ? "한국" : "미국") + '</td><td><button class="table-action" data-symbol="' + asset.symbol + '"' + (orderDisabled ? ' disabled title="현재가를 불러오는 중입니다."' : '') + '>주문</button></td>';
           tbody.append(tr);
         });
         tbody.querySelectorAll("[data-symbol]").forEach(button => button.addEventListener("click", () => {
-          selectedAsset = assets.find(a => a.symbol === button.dataset.symbol);
+          selectedAsset = assets.find(asset => asset.symbol === button.dataset.symbol);
           renderTradePanel();
           goToView("market");
         }));
