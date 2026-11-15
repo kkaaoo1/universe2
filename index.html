@@ -1130,11 +1130,11 @@
           const redirectTo = window.location.origin + window.location.pathname;
           let result;
           if (user && user.is_anonymous) {
-            result = await remoteClient.auth.linkIdentity({ provider:"kakao", options:{ redirectTo } });
+            result = await remoteClient.auth.linkIdentity({ provider:"kakao", options:{ redirectTo, scopes:"profile_nickname" } });
           } else if (user) {
             throw new Error("현재 로그인한 계정에 카카오를 연결할 수 없습니다. 먼저 로그아웃해주세요.");
           } else {
-            result = await remoteClient.auth.signInWithOAuth({ provider:"kakao", options:{ redirectTo } });
+            result = await remoteClient.auth.signInWithOAuth({ provider:"kakao", options:{ redirectTo, scopes:"profile_nickname" } });
           }
           if (result.error) throw result.error;
           authGateMessage = "카카오 로그인 화면으로 이동합니다.";
