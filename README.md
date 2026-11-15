@@ -10,7 +10,7 @@ After GitHub Pages is enabled for GitHub Actions, the site URL is:
 
 https://kkaaoo1.github.io/universe2/
 
-The Pages workflow publishes the repository root on every push to `main`.
+GitHub Pages is configured to use the GitHub Actions source. The Pages workflow publishes the repository root on every push to `main`.
 
 ## One-time setup
 
