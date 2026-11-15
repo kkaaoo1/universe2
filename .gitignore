@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+kis_devlp.yaml
+.venv/
+__pycache__/
+*.py[cod]
+

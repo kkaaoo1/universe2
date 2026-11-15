@@ -1,0 +1,1482 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="campus-release" content="universe2-simulated-market-v1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090b10">
+  <meta name="description" content="가상 기업의 주가가 주말과 공휴일에도 매분 움직이는 365일 대학 모의투자 리그.">
+  <title>Universe 2 — 365일 가상 주식 리그</title>
+  <script src="./config.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090b10;
+      --panel: #11151d;
+      --panel-soft: #151a23;
+      --line: rgba(211, 222, 240, .11);
+      --ink: #eef2f8;
+      --muted: #8d97a8;
+      --lime: #c5f36b;
+      --mint: #69e0b4;
+      --red: #ff7d78;
+      --gold: #f0c86e;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 74% -10%, rgba(109, 126, 75, .16), transparent 36%),
+        radial-gradient(ellipse at 3% 38%, rgba(50, 98, 108, .12), transparent 34%),
+        var(--bg);
+      font-family: Inter, "Segoe UI", "Malgun Gothic", sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { width: min(1240px, calc(100% - 42px)); margin: 0 auto; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 76px; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 11px; color: var(--ink); text-decoration: none; }
+    .brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; color: #12170b; background: var(--lime); font: 700 16px/1 "Courier New", monospace; box-shadow: 0 0 25px rgba(197,243,107,.2); }
+    .brand-name { font-size: 14px; font-weight: 700; letter-spacing: .1em; }
+    .brand-sub { margin-top: 3px; color: var(--muted); font: 9px/1 "Courier New", monospace; letter-spacing: .14em; }
+    .nav { display: flex; align-items: center; gap: 6px; }
+    .nav button { padding: 9px 13px; border: 1px solid transparent; border-radius: 8px; color: #9ba4b3; background: transparent; font-size: 12px; }
+    .nav button:hover, .nav button.active { border-color: var(--line); color: var(--ink); background: rgba(255,255,255,.04); }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .season-chip, .data-chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; color: #aeb8c7; background: rgba(255,255,255,.025); font: 9px/1 "Courier New", monospace; letter-spacing: .08em; white-space: nowrap; }
+    .data-chip { color: #eccf83; border-color: rgba(240,200,110,.22); background: rgba(240,200,110,.06); }
+    .data-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+    .hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; padding: 48px 0 25px; }
+    .kicker { margin: 0 0 11px; color: var(--lime); font: 10px/1.4 "Courier New", monospace; letter-spacing: .18em; }
+    h1 { margin: 0; font-size: clamp(29px, 4vw, 46px); font-weight: 550; letter-spacing: -.055em; line-height: 1.1; }
+    .hero-copy { max-width: 630px; margin: 13px 0 0; color: #9ba5b4; font-size: 13px; line-height: 1.75; }
+    .hero-aside { min-width: 180px; padding: 13px 15px; border-left: 1px solid rgba(197,243,107,.5); color: #b8c1cf; font: 10px/1.7 "Courier New", "Malgun Gothic", monospace; }
+    .hero-aside strong { display: block; color: var(--lime); font-size: 12px; letter-spacing: .07em; }
+    .notice { display: flex; align-items: flex-start; gap: 11px; margin: 6px 0 22px; padding: 13px 15px; border: 1px solid rgba(240,200,110,.2); border-radius: 10px; color: #cabd98; background: rgba(240,200,110,.045); font-size: 11px; line-height: 1.6; }
+    .notice-icon { color: var(--gold); font: 14px/1.4 "Courier New", monospace; }
+    .notice strong { color: #ebdcae; font-weight: 600; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .stat, .card { border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(150deg, rgba(255,255,255,.035), transparent 70%), var(--panel); }
+    .stat { min-height: 108px; padding: 16px 18px; }
+    .stat-label { color: #8994a4; font: 9px/1.4 "Courier New", monospace; letter-spacing: .1em; }
+    .stat-value { margin-top: 12px; font-size: 24px; font-weight: 560; letter-spacing: -.045em; }
+    .stat-sub { margin-top: 4px; color: #7f8999; font-size: 10px; }
+    .positive { color: var(--mint) !important; }
+    .negative { color: var(--red) !important; }
+    .muted { color: var(--muted) !important; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(290px, .8fr); gap: 15px; align-items: start; }
+    .stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 15px; }
+    .layout > *, .stack > *, .subgrid > *, .stats > *, .halls > *, .currency-panel > * { min-width: 0; }
+    .card, .join-card { width: 100%; min-width: 0; }
+    .table-scroll { width: 100%; min-width: 0; overflow-x: auto; }
+    .card-heading > div, .trade-symbol > div { min-width: 0; }
+    .profile-school, .trade-price, .holding-name { overflow-wrap: anywhere; }
+    .trade-big-badge { flex-shrink: 0; }
+    .card { padding: 18px; }
+    .card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; margin-bottom: 16px; }
+    .card-title { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: -.01em; }
+    .card-description { margin: 5px 0 0; color: #808b9b; font-size: 10px; line-height: 1.5; }
+    .tiny-label { color: #778293; font: 9px/1.4 "Courier New", monospace; letter-spacing: .08em; }
+    .market-tabs { display: flex; gap: 6px; }
+    .market-tabs button, .segmented button { padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; color: #919bad; background: #0d1118; font-size: 10px; }
+    .market-tabs button.active, .segmented button.active { border-color: rgba(197,243,107,.34); color: var(--lime); background: rgba(197,243,107,.065); }
+    .popularity-tabs { margin-bottom: 8px; }
+    .popularity-hint { margin: 0 0 14px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .asset-popularity { display: block; margin-top: 4px; color: var(--lime); font-size: 10px; line-height: 1.5; }
+    .loan-summary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:14px 0; }
+    .loan-summary > div { min-width:0; padding:12px; border:1px solid var(--line); border-radius:8px; background:#0c1016; }
+    .loan-summary dt { color:var(--muted); font-size:11px; }
+    .loan-summary dd { margin:8px 0 0; overflow-wrap:anywhere; font-size:18px; font-variant-numeric:tabular-nums; }
+    .loan-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .loan-actions button { min-width:0; white-space:normal; min-height:42px; }
+    .loan-terms { color:#aeb9c9; font-size:12px; line-height:1.8; }
+    .loan-history { display:grid; gap:8px; margin-top:14px; }
+    .loan-event { display:flex; justify-content:space-between; gap:12px; padding-top:9px; border-top:1px solid var(--line); font-size:11px; }
+    .loan-event small { display:block; color:var(--muted); margin-top:4px; }
+    .loan-game-over { border-color:rgba(255,125,120,.4); color:#ffb3ad; }
+    .stock-search { display: grid; grid-template-columns: minmax(0,1fr) 142px; gap: 8px; margin: 0 0 8px; }
+    .stock-search input, .stock-search select { min-width: 0; width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 7px; outline: none; color: var(--ink); background: #0b0f15; font-size: 11px; }
+    .stock-search input:focus, .stock-search select:focus { border-color: rgba(197,243,107,.6); }
+    .stock-search-status { margin: 0 0 10px; color: #7f8999; font-size: 9px; line-height: 1.5; }
+    .stock-results { display: grid; gap: 6px; max-height: 350px; overflow: auto; }
+    .stock-result { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 10px 11px; border: 1px solid rgba(211,222,240,.075); border-radius: 8px; background: #0c1016; }
+    .stock-result-name { overflow: hidden; color: #e9eef6; font-size: 11px; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
+    .stock-result-meta { overflow: hidden; margin-top: 4px; color: #788393; font: 8px/1.4 "Courier New", "Malgun Gothic", monospace; text-overflow: ellipsis; white-space: nowrap; }
+    .stock-result-action { padding: 7px 9px; border: 1px solid rgba(197,243,107,.24); border-radius: 6px; color: var(--lime); background: rgba(197,243,107,.06); font-size: 9px; white-space: nowrap; }
+    .stock-result-action:disabled { opacity: .5; cursor: wait; }
+    .market-table { width: 100%; border-collapse: collapse; }
+    .market-table th { padding: 0 8px 10px; color: #778293; text-align: right; font: 8px/1.4 "Courier New", monospace; letter-spacing: .08em; white-space: nowrap; }
+    .market-table th:first-child { padding-left: 0; text-align: left; }
+    .market-table td { padding: 11px 8px; border-top: 1px solid rgba(211,222,240,.075); color: #d9e0e9; text-align: right; font-size: 11px; white-space: nowrap; }
+    .market-table td:first-child { padding-left: 0; text-align: left; }
+    .asset { display: flex; align-items: center; gap: 9px; min-width: 130px; }
+    .asset-badge { display: grid; flex: 0 0 27px; place-items: center; width: 27px; height: 27px; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; color: #e6edfa; background: #202733; font: 700 8px/1 "Courier New", monospace; }
+    .asset-name { display: block; color: #e9eef6; font-size: 11px; font-weight: 550; }
+    .asset-meta { display: block; margin-top: 3px; color: #778293; font: 8px/1 "Courier New", monospace; }
+    .quote-price { color: #e7ecf3 !important; font-variant-numeric: tabular-nums; }
+    .quote-context { display: block; margin-top: 4px; color: #8290a3; font: 8px/1.25 "Courier New", monospace; }
+    .table-action { padding: 6px 9px; border: 1px solid rgba(197,243,107,.24); border-radius: 6px; color: var(--lime); background: rgba(197,243,107,.06); font-size: 9px; }
+    .table-action:hover { background: rgba(197,243,107,.13); }
+    .currency-panel { display: grid; grid-template-columns: minmax(0,1fr) 20px minmax(0,1fr); align-items: end; gap: 8px; padding: 14px; border: 1px solid rgba(211,222,240,.08); border-radius: 10px; background: #0c1016; }
+    .currency-label { margin-bottom: 8px; color: #7f8998; font: 8px/1.3 "Courier New", monospace; letter-spacing: .09em; }
+    .currency-amount { color: #edf2f8; font: 17px/1.4 "Courier New", monospace; overflow-wrap: anywhere; }
+    .currency-unit { margin-top: 4px; color: #7f8998; font: 9px/1.3 "Courier New", monospace; }
+    .swap { align-self: center; color: var(--lime); text-align: center; font-size: 14px; }
+    .fx-rate { margin: 12px 0; color: #9da7b7; font: 10px/1.5 "Courier New", monospace; }
+    .fx-rate strong { color: #dfe7f1; font-weight: 500; }
+    .exchange-form { display: flex; gap: 8px; }
+    .exchange-form input, .field input, .field select { min-width: 0; width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 7px; outline: none; color: var(--ink); background: #0b0f15; font-size: 11px; }
+    .exchange-form input:focus, .field input:focus, .field select:focus { border-color: rgba(197,243,107,.6); }
+    .primary { padding: 10px 13px; border: 1px solid var(--lime); border-radius: 7px; color: #10150b; background: var(--lime); font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .primary:hover { background: #d5ff87; }
+    .primary:disabled, .secondary:disabled { opacity: .42; cursor: not-allowed; filter: saturate(.3); }
+    .secondary { padding: 9px 12px; border: 1px solid var(--line); border-radius: 7px; color: #cbd3df; background: #171c25; font-size: 10px; }
+    .secondary:hover { background: #1d2430; }
+    .leader-list { display: grid; gap: 0; }
+    .leader-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 11px 0; border-top: 1px solid rgba(211,222,240,.075); }
+    .rank { color: #707b8b; font: 10px/1 "Courier New", monospace; text-align: center; }
+    .rank.first { color: var(--gold); }
+    .leader-school { overflow: hidden; color: #d9e0e9; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .leader-count { margin-top: 3px; color: #788393; font-size: 9px; }
+    .leader-score { text-align: right; }
+    .leader-profit { font: 11px/1.2 "Courier New", monospace; }
+    .leader-return { margin-top: 4px; font: 9px/1.2 "Courier New", monospace; }
+    .empty { padding: 23px 6px; color: #778293; text-align: center; font-size: 10px; line-height: 1.6; }
+    .fx-foot, .footnote { color: #717c8d; font-size: 9px; line-height: 1.6; }
+    .fx-foot { margin: 10px 0 0; }
+    .halls { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+    .hall { padding: 15px; border: 1px solid var(--line); border-radius: 10px; background: #0c1016; }
+    .hall-kicker { margin: 0; color: #a0aaba; font: 8px/1.4 "Courier New", monospace; letter-spacing: .11em; }
+    .hall-avatar { display: grid; place-items: center; width: 34px; height: 34px; margin: 14px 0 10px; border: 1px solid rgba(255,255,255,.1); border-radius: 50%; color: #d4e8a3; background: rgba(197,243,107,.08); font-size: 13px; }
+    .hall-name { overflow: hidden; color: #e2e8f0; font-size: 11px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+    .hall-school { overflow: hidden; margin-top: 4px; color: #828d9e; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+    .hall-return { margin-top: 12px; font: 19px/1 "Courier New", monospace; letter-spacing: -.06em; }
+    .join-card { padding: 18px; border: 1px solid rgba(197,243,107,.2); border-radius: 12px; background: linear-gradient(130deg, rgba(197,243,107,.075), transparent 58%), var(--panel); }
+    .join-copy { margin: 7px 0 14px; color: #8d97a8; font-size: 10px; line-height: 1.6; }
+    .join-form { display: grid; gap: 9px; }
+    .join-form .primary { width: 100%; min-height: 38px; }
+
+    .school-picker-field { display:grid; gap:7px; }
+    .school-picker-button { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; min-height:42px; padding:10px 11px; border:1px solid var(--line); border-radius:7px; color:#e6edf7; background:#0b0f15; text-align:left; font-size:11px; transition:border-color .18s ease,background .18s ease; }
+    .school-picker-button:hover,.school-picker-button:focus-visible { border-color:rgba(197,243,107,.55); background:#10161c; outline:none; }
+    .school-picker-label { overflow:hidden; color:#8d97a8; text-overflow:ellipsis; white-space:nowrap; }
+    .school-picker-button.has-value .school-picker-label { color:#eef2f8; }
+    .school-picker-action { display:inline-flex; align-items:center; gap:6px; flex:0 0 auto; color:var(--lime); font-size:10px; }
+    .school-picker-help { margin:0; color:#778293; font-size:9px; line-height:1.5; }
+    .nickname-check { min-height:14px; margin:-3px 0 1px; color:#7f8999; font-size:9px; line-height:1.5; }
+    .nickname-check.pending { color:#aeb8c7; } .nickname-check.available { color:var(--mint); } .nickname-check.taken,.nickname-check.error { color:var(--red); }
+    .school-dialog { width:min(560px,calc(100% - 28px)); max-height:min(86vh,720px); padding:0; overflow:hidden; border:1px solid rgba(197,243,107,.22); border-radius:15px; color:var(--ink); background:#11151d; box-shadow:0 28px 100px #000b; }
+    .school-dialog::backdrop { background:rgba(4,6,10,.82); backdrop-filter:blur(9px); }
+    .school-dialog-content { display:flex; flex-direction:column; max-height:inherit; }
+    .school-dialog-head { display:flex; align-items:flex-start; justify-content:space-between; gap:15px; padding:22px 22px 14px; }
+    .school-dialog-kicker { margin:0 0 7px; color:var(--lime); font:9px/1.4 "Courier New",monospace; letter-spacing:.14em; }
+    .school-dialog-title { margin:0; color:#eef2f8; font-size:20px; font-weight:600; letter-spacing:-.04em; }
+    .school-dialog-description { margin:6px 0 0; color:#8d97a8; font-size:10px; line-height:1.6; }
+    .school-dialog-close { display:grid; flex:0 0 32px; place-items:center; width:32px; height:32px; border:1px solid var(--line); border-radius:8px; color:#aeb8c7; background:#171c25; font-size:19px; line-height:1; }
+    .school-dialog-close:hover { color:white; background:#202733; }
+    .school-search-wrap { display:flex; align-items:center; gap:10px; margin:0 22px 9px; padding:0 12px; border:1px solid rgba(211,222,240,.12); border-radius:9px; color:var(--lime); background:#0b0f15; }
+    .school-search-wrap:focus-within { border-color:rgba(197,243,107,.5); }
+    .school-search-wrap input { width:100%; min-width:0; height:42px; border:0; outline:0; color:var(--ink); background:transparent; font-size:11px; }
+    .school-search-wrap input::placeholder { color:#697485; }
+    .school-choice-hint { min-height:16px; margin:0 22px 9px; color:#778293; font-size:9px; line-height:1.5; }
+    .school-choice-list { display:grid; align-content:start; gap:6px; min-height:140px; max-height:min(52vh,430px); padding:0 22px 14px; overflow:auto; overscroll-behavior:contain; }
+    .school-option { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:10px 12px; border:1px solid rgba(211,222,240,.08); border-radius:8px; color:#dbe3ef; background:#0c1016; text-align:left; }
+    .school-option:hover,.school-option:focus-visible { border-color:rgba(197,243,107,.35); background:rgba(197,243,107,.055); outline:none; }
+    .school-option-main { min-width:0; } .school-option-name { display:block; overflow:hidden; font-size:11px; font-weight:550; text-overflow:ellipsis; white-space:nowrap; }
+    .school-option-meta { display:block; margin-top:4px; color:#778293; font-size:9px; line-height:1.4; }
+    .school-option-check { flex:0 0 auto; color:var(--lime); font-size:12px; }
+    .school-option-custom { border-color:rgba(197,243,107,.24); background:rgba(197,243,107,.055); }
+    .school-dialog-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 22px 18px; border-top:1px solid rgba(211,222,240,.08); color:#778293; font-size:9px; line-height:1.5; }
+    .school-empty { padding:20px 8px; color:#8490a2; text-align:center; font-size:10px; line-height:1.7; }
+    .profile-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .profile-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .profile-avatar { display: grid; place-items: center; flex: 0 0 34px; width: 34px; height: 34px; border: 1px solid rgba(197,243,107,.22); border-radius: 10px; color: var(--lime); background: rgba(197,243,107,.07); }
+    .profile-name { overflow: hidden; color: #e5ebf3; font-size: 11px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+    .profile-school { margin-top: 3px; color: #7f8999; font-size: 9px; }
+    .holdings { display: grid; gap: 0; }
+    .holding { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center; gap: 13px; padding: 12px 0; border-top: 1px solid rgba(211,222,240,.075); }
+    .holding-name { color: #dfe5ee; font-size: 10px; }
+    .holding-shares { margin-top: 4px; color: #778293; font: 8px/1 "Courier New", monospace; }
+    .holding-value, .holding-pnl { font: 10px/1.3 "Courier New", monospace; text-align: right; }
+    .trade-panel { position: sticky; top: 16px; }
+    .trade-symbol { display: flex; align-items: center; gap: 11px; padding: 12px; border: 1px solid rgba(255,255,255,.08); border-radius: 9px; background: #0c1016; }
+    .trade-big-badge { display: grid; place-items: center; width: 35px; height: 35px; border: 1px solid rgba(255,255,255,.11); border-radius: 10px; color: white; background: #222a37; font: 700 9px/1 "Courier New", monospace; }
+    .trade-price { margin-top: 4px; color: #9ba6b5; font: 10px/1.2 "Courier New", monospace; }
+    .segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 13px 0; }
+    .segmented button { padding: 9px; }
+    .segmented button.buy.active { border-color: rgba(105,224,180,.35); color: var(--mint); background: rgba(105,224,180,.07); }
+    .segmented button.sell.active { border-color: rgba(255,125,120,.32); color: var(--red); background: rgba(255,125,120,.07); }
+    .field { display: grid; gap: 6px; margin-bottom: 10px; color: #97a2b1; font-size: 9px; }
+    .order-preview { margin: 12px 0; padding: 11px; border: 1px solid rgba(211,222,240,.08); border-radius: 8px; background: #0c1016; }
+    .preview-row { display: flex; justify-content: space-between; gap: 10px; color: #828d9d; font-size: 9px; }
+    .preview-row + .preview-row { margin-top: 8px; }
+    .preview-row strong { color: #d8e0eb; font: 10px/1.2 "Courier New", monospace; font-weight: 500; text-align: right; }
+    .trade-submit { width: 100%; min-height: 39px; }
+    .inline-status { min-height: 18px; margin: 9px 0 0; color: #828d9d; font-size: 9px; line-height: 1.5; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .view-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin: 26px 0 16px; }
+    .view-head h2 { margin: 0; font-size: 22px; font-weight: 550; letter-spacing: -.04em; }
+    .view-head p { margin: 6px 0 0; color: #8b96a6; font-size: 10px; }
+    .subgrid { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,.9fr); gap: 15px; }
+    .portfolio-total { margin: 7px 0 6px; font-size: 29px; font-weight: 550; letter-spacing: -.05em; }
+    .portfolio-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; color: #8994a4; font: 9px/1.5 "Courier New", monospace; }
+    .portfolio-meta strong { color: #dce4ef; font-weight: 500; }
+    .history { width: 100%; border-collapse: collapse; }
+    .history th, .history td { padding: 10px 6px; border-top: 1px solid rgba(211,222,240,.075); color: #8e99a9; text-align: left; font-size: 9px; }
+    .history th { color: #6f7a8a; font: 8px/1.3 "Courier New", monospace; }
+    .history td:last-child, .history th:last-child { text-align: right; }
+    .history td strong { color: #dce4ee; font-weight: 500; }
+    .privacy-note { margin: 14px 0 0; padding: 11px 12px; border: 1px solid rgba(211,222,240,.08); border-radius: 8px; color: #7f899a; background: rgba(255,255,255,.018); font-size: 9px; line-height: 1.6; }
+    .footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 23px; padding: 17px 0 28px; border-top: 1px solid var(--line); color: #606c7d; font: 9px/1.6 "Courier New", "Malgun Gothic", monospace; }
+    .toast { position: fixed; z-index: 5; right: 22px; bottom: 20px; max-width: min(360px, calc(100% - 44px)); padding: 12px 14px; border: 1px solid rgba(197,243,107,.24); border-radius: 9px; color: #dfe8d0; background: #171d18; box-shadow: 0 14px 35px #0008; font-size: 11px; opacity: 0; transform: translateY(8px); transition: opacity .2s ease, transform .2s ease; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .hidden { display: none !important; }
+    .auth-gate { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 22px; background: rgba(5,7,11,.94); backdrop-filter: blur(12px); }
+    .auth-gate[hidden] { display: none; }
+    .auth-gate-card { width: min(100%, 430px); padding: 25px; border: 1px solid rgba(197,243,107,.2); border-radius: 14px; background: linear-gradient(145deg, rgba(197,243,107,.07), transparent 55%), #11151d; box-shadow: 0 24px 90px #000a; }
+    .auth-gate-kicker { margin: 0 0 10px; color: var(--lime); font: 9px/1.4 "Courier New", monospace; letter-spacing: .12em; }
+    .auth-gate-title { margin: 0; color: #f1f5fb; font-size: 22px; font-weight: 600; letter-spacing: -.04em; }
+    .auth-gate-copy { margin: 11px 0 18px; color: #9aa5b5; font-size: 11px; line-height: 1.7; }
+    .kakao-auth-button { width: 100%; min-height: 42px; padding: 11px 14px; border: 0; border-radius: 8px; color: #191919; background: #fee500; font-size: 11px; font-weight: 750; }
+    .kakao-auth-button:hover { background: #ffe95c; }
+    .kakao-auth-button:disabled { opacity: .5; cursor: not-allowed; }
+    .auth-gate-status, .account-status { margin: 10px 0 0; color: #8995a6; font-size: 9px; line-height: 1.6; }
+    .profile-actions { display: flex; gap: 7px; }
+    @media (max-width: 980px) {
+      .shell { width: min(100% - 30px, 780px); }
+      .topbar { flex-wrap: wrap; padding: 14px 0; }
+      .nav { order: 3; width: 100%; overflow-x: auto; }
+      .nav button { flex: 1 0 auto; }
+      .layout, .right-column, .subgrid { grid-template-columns: minmax(0,1fr); }
+      .trade-panel, #market-view .trade-panel { position: static; }
+      .stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    }
+    @media (max-width: 640px) {
+      .shell { width: calc(100% - 24px); }
+      .topbar { gap: 12px; }
+      .top-actions { margin-left: auto; }
+      .season-chip { display: none; }
+      .hero { display: block; padding: 34px 0 20px; }
+      .hero-aside { margin-top: 18px; padding: 9px 12px; }
+      .layout, .stack, .subgrid { gap: 12px; }
+      .stats { gap: 8px; grid-auto-rows: 1fr; margin-bottom: 12px; }
+      .stat { min-height: 112px; padding: 12px; }
+      .stat-value { font-size: clamp(17px,4.7vw,22px); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+      #stat-school { font-size: 17px !important; line-height: 1.4; }
+      .card, .join-card { padding: 14px; border-radius: 12px; }
+      .card-heading { flex-wrap: wrap; gap: 10px; }
+      .card-heading > div:first-child { flex: 1 1 170px; }
+      .card-heading .market-tabs { flex: 0 0 auto; }
+      .stock-search { grid-template-columns: minmax(0,1fr); }
+      .market-table, .market-table tbody { display: block; }
+      .market-table thead { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+      .market-table tr { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center; gap: 10px 8px; padding: 14px 0; border-top: 1px solid var(--line); }
+      .market-table td { display: block; min-width: 0; border: 0; padding: 0; white-space: normal; }
+      .market-table td:first-child { grid-column: 1 / 3; grid-row: 1; }
+      .market-table td:nth-child(2) { grid-column: 1; grid-row: 2; text-align: left; }
+      .market-table td:nth-child(3) { grid-column: 2; grid-row: 2; }
+      .market-table td:nth-child(4) { grid-column: 3; grid-row: 1; color: var(--muted); font-size: 10px; }
+      .market-table td:nth-child(5) { grid-column: 3; grid-row: 2; }
+      .asset { min-width: 0; }
+      .asset > span:last-child { min-width: 0; }
+      .asset-name { overflow-wrap: anywhere; }
+      .quote-context { max-width: 100%; overflow-wrap: anywhere; }
+      .table-action { min-height: 40px; padding: 9px 12px; }
+      .profile-card { flex-direction: column; align-items: stretch; }
+      .profile-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .currency-panel { padding: 12px; gap: 6px; grid-template-columns: minmax(0,1fr) 16px minmax(0,1fr); }
+      .currency-amount { font-size: clamp(13px,3.7vw,17px); }
+      .exchange-form { display: grid; grid-template-columns: minmax(0,1fr) auto; }
+      .exchange-form input, .field input, .field select, .stock-search input, .stock-search select, .school-search-wrap input { min-height: 44px; font-size: 16px; }
+      .primary, .secondary, .market-tabs button, .segmented button { min-height: 40px; }
+      .history { min-width: 480px; }
+      .leader-row { gap: 8px; grid-template-columns: 20px minmax(0,1fr) auto; }
+      .leader-profit { font-size: 10px; }
+      .notice { flex-wrap: wrap; }
+      .halls { gap: 8px; }
+      .hall { padding: 12px; }
+      .school-dialog { width:calc(100% - 20px); max-height:90svh; border-radius:12px; }
+      .school-dialog-head { padding:18px 16px 12px; }
+      .school-search-wrap,.school-choice-hint { margin-right:16px; margin-left:16px; }
+      .school-choice-list { padding-right:16px; padding-left:16px; }
+      .school-dialog-foot { padding-right:16px; padding-left:16px; }
+      .view-head { align-items: flex-start; flex-direction: column; }
+      .footer { flex-direction: column; gap: 5px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  
+    .card-description, .stat-sub, .inline-status, .fx-foot, .profile-school, .leader-count { font-size:12px; line-height:1.65; }
+    .asset-meta, .quote-context { font-size:11px; line-height:1.5; }
+    .asset-name, .leader-school, .card-title { font-size:14px; }
+    [hidden] { display:none !important; }
+    .hero { padding:28px 0 22px; }
+    .hero h1 { font-size:clamp(25px, 4vw, 38px); }
+    .hero .kicker, .brand-sub, .currency-unit { display:none; }
+    .hero-copy { max-width:760px; margin-top:8px; }
+    .holding { grid-template-columns:minmax(0,1fr) auto; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    button:focus-visible, input:focus-visible { outline:2px solid var(--lime); outline-offset:3px; }
+    #market-view .trade-panel { top:16px; align-self:start; }
+    @media(max-width:700px) { .top-actions { display:none; } .nav { overflow-x:auto; } }
+  </style>
+</head>
+<body>
+  <div class="auth-gate" id="auth-gate" role="dialog" aria-modal="true" aria-labelledby="auth-gate-title">
+    <section class="auth-gate-card">
+      <p class="auth-gate-kicker">CAMPUS LEAGUE · KAKAO ACCOUNT</p>
+      <h1 class="auth-gate-title" id="auth-gate-title">카카오 로그인으로 시작하세요.</h1>
+      <p class="auth-gate-copy">로그인 후 게임 별명과 학교를 정해 참가합니다. 순위와 기록에는 직접 입력한 별명과 학교만 표시되고, 카카오 프로필 이름은 사용하지 않습니다.</p>
+      <button class="kakao-auth-button" id="auth-gate-kakao" type="button" disabled>카카오로 로그인</button>
+      <p class="auth-gate-status" id="auth-gate-status" role="status">로그인 상태를 확인하고 있어요.</p>
+    </section>
+  </div>
+  <div class="shell" id="app-shell" inert>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Campus League 홈">
+        <span class="brand-mark" aria-hidden="true">U2</span>
+        <span><span class="brand-name">UNIVERSE 2</span><span class="brand-sub">ALWAYS-ON PAPER MARKET</span></span>
+      </a>
+      <nav class="nav" aria-label="메인 메뉴">
+        <button class="active" data-view="dashboard">리그 홈</button>
+        <button data-view="market">마켓</button>
+        <button data-view="portfolio">내 투자</button>
+        <button data-view="records">명예의 전당</button>
+      </nav>
+      <div class="top-actions">
+        
+        <span class="data-chip"><span id="data-mode">가상 투자</span></span>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <p class="kicker">UNIVERSITY INVESTMENT LEAGUE · 2026</p>
+        <h1>우리 학교의 투자 리그</h1>
+        <p class="hero-copy">모든 참가자는 가상자금 <strong>₩10,000,000</strong>으로 출발합니다. 한국·미국 주식을 사고팔고, 달러로 환전해 개인 포트폴리오와 학교 순위를 만들어보세요.</p>
+      </div>
+      
+    </section>
+
+    <div class="notice" id="data-notice" role="status" hidden>
+      <span class="notice-icon">◎</span>
+      <span id="data-notice-copy"><strong>가상 투자 게임</strong> — 가격은 실제 시세와 다를 수 있으며 거래는 게임 계좌에만 반영됩니다.</span>
+    </div>
+
+    <div id="pending-action" class="notice" hidden><span id="pending-copy"></span><button id="retry-pending" class="secondary" type="button">이전 요청 확인</button></div>
+    <div id="loan-game-status" class="notice loan-game-over" role="status" hidden></div>
+    <section id="dashboard-view" class="view active">
+      <div class="stats">
+        <article class="stat"><div class="stat-label">순자산</div><div class="stat-value" id="stat-assets">₩10,000,000</div><div class="stat-sub">현금 + 주식 − 대출·이자</div></article>
+        <article class="stat"><div class="stat-label">내 수익률</div><div class="stat-value" id="stat-return">0.00%</div><div class="stat-sub" id="stat-profit">수익금 ₩0</div></article>
+        <article class="stat"><div class="stat-label">내 학교</div><div class="stat-value" id="stat-school">참가 전</div><div class="stat-sub">학교별 합산 수익금 · 평균 수익률</div></article>
+        <article class="stat"><div class="stat-label">USD / KRW</div><div class="stat-value" id="stat-fx">₩1,380</div><div class="stat-sub" id="stat-fx-sub">예시 환율 · 게임용</div></article>
+      </div>
+
+      <div class="layout">
+        <div class="stack">
+          <section class="card">
+            <div class="card-heading">
+              <div><h2 class="card-title">가상 주식 마켓</h2><p class="card-description"><button class="secondary" data-go="market" type="button">전체 종목 검색 →</button></p></div>
+              <div class="market-tabs" aria-label="시장 선택"><button class="active" data-market="ALL">전체</button><button data-market="KR">한국</button><button data-market="US">미국</button></div>
+            </div>
+            <p class="footnote">가상 회사 24곳 · 주가는 매분 변동 · 주말·공휴일 포함 연중무휴</p>
+            <div class="market-tabs popularity-tabs" aria-label="인기 종목 정렬"><button class="active" type="button" data-popularity="holders" aria-pressed="true">많이 보유한</button><button type="button" data-popularity="searches" aria-pressed="false">많이 검색한</button></div>
+            <p class="popularity-hint"></p><div class="empty popularity-empty" hidden></div>
+            <div class="table-scroll">
+              <table class="market-table">
+                <thead><tr><th>종목</th><th class="price-heading">시세</th><th>변동률</th><th>시장</th><th></th></tr></thead>
+                <tbody id="market-rows"></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="card">
+            <div class="card-heading">
+              <div><h2 class="card-title">대학 리그 순위</h2><p class="card-description">학교 수익금 합계와 참가자 평균 수익률로 겨룹니다.</p></div>
+              
+            </div>
+            <div id="school-leaderboard" class="leader-list"></div>
+                      </section>
+          <section class="card">
+            <div class="card-heading">
+              <div><h2 class="card-title">개인 수익률 명예의 전당</h2><p class="card-description">시즌 최고 수익률과 가장 낮은 수익률을 기록한 참가자.</p></div>
+              
+            </div>
+            <div id="hall-of-fame" class="halls"></div>
+          </section>
+        </div>
+        <aside class="stack right-column">
+          <section class="join-card" id="join-card">
+            <div class="card-heading" style="margin-bottom:0"><div><h2 class="card-title">리그 참가</h2><p class="card-description">카카오 로그인 후 별명과 학교를 등록해 참가하세요.</p></div></div>
+            <p class="join-copy" id="join-copy">카카오 로그인 후 별명과 학교를 정하면 가상 계좌가 만들어집니다.</p>
+            <form class="join-form" id="join-form">
+              <label class="field">별명<input id="nickname" maxlength="20" placeholder="예: 투자하는 고래" aria-describedby="nickname-check" required><span id="nickname-check" class="nickname-check" aria-live="polite">별명은 전국 리그에서 중복될 수 없어요.</span></label>
+              <label class="field">대학교
+                <div class="school-picker-field">
+                  <input id="school" type="hidden">
+                  <button class="school-picker-button" id="open-school-picker" type="button" aria-haspopup="dialog" aria-controls="school-dialog"><span class="school-picker-label" id="school-picker-label">학교를 찾아 선택하세요</span><span class="school-picker-action">학교 찾기 <span aria-hidden="true">⌕</span></span></button>
+                  <span class="school-picker-help">대학교·전문대·사이버대 모두 참가할 수 있어요. 목록에 없으면 학교명을 검색해 직접 등록하세요.</span>
+                </div>
+              </label>
+              <button class="primary" type="submit">₩10,000,000 받고 참가하기</button>
+            </form>
+            <p class="account-status">공개되는 정보는 게임 별명과 학교입니다. 카카오 실명이나 프로필 이름은 순위에 사용하지 않습니다.</p>
+          </section>
+          <section class="card hidden" id="profile-card">
+            <div class="card-heading"><div><h2 class="card-title">내 참가 정보</h2><p class="card-description">내 별명과 학교</p></div></div>
+            <div class="profile-card"><div class="profile-left"><span class="profile-avatar">✦</span><div style="min-width:0"><div class="profile-name" id="profile-name"></div><div class="profile-school" id="profile-school"></div></div></div><div class="profile-actions"><button class="secondary" id="edit-profile" type="button">별명 수정</button><button class="secondary" id="auth-signout" type="button">로그아웃</button></div></div>
+            <p class="account-status" id="account-link-status"></p>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><h2 class="card-title">환전소</h2><p class="card-description">미국 주식을 사려면 먼저 원화를 달러로 바꾸세요.</p></div></div>
+            <div class="currency-panel">
+              <div><div class="currency-label">보유 원화</div><div class="currency-amount" id="cash-krw">₩10,000,000</div><div class="currency-unit">KRW WALLET</div></div>
+              <div class="swap">⇄</div>
+              <div><div class="currency-label">보유 달러</div><div class="currency-amount" id="cash-usd">$0.00</div><div class="currency-unit">USD WALLET</div></div>
+            </div>
+            <p class="fx-rate"><span id="fx-label">게임 환율</span> <strong id="fx-display">1 USD = ₩1,380</strong> <span id="fx-freshness" class="muted">· 예시 환율</span></p>
+            <label class="field">환전 방향<select id="exchange-direction"><option value="KRW_USD">원화 → 달러</option><option value="USD_KRW">달러 → 원화</option></select></label>
+            <form class="exchange-form" id="exchange-form">
+              <input id="exchange-amount" type="number" min="1000" step="1000" placeholder="환전할 원화" aria-label="환전할 원화" required>
+              <button class="secondary" id="exchange-submit" type="submit">USD로 환전</button>
+            </form>
+            <p class="fx-foot">환율 변동은 미국 주식의 원화 평가액에도 반영됩니다.</p>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><h2 class="card-title">가상 대출</h2><p class="card-description">연 8% · 자기자본 한도</p></div><button class="secondary" type="button" data-go="portfolio">대출 관리</button></div>
+            <div class="preview-row"><span>대출 잔액</span><strong id="mini-loan-principal">₩0</strong></div>
+            <div class="preview-row"><span>추가 대출 가능</span><strong id="mini-loan-credit">—</strong></div>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><h2 class="card-title">내 보유 종목</h2><p class="card-description">보유 수량과 평가 금액</p></div><button class="secondary" data-go="portfolio" type="button">전체 보기</button></div>
+            <div id="mini-holdings" class="holdings"></div>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <section id="market-view" class="view">
+      <div class="view-head"><div><h2>주식 마켓</h2><p>한국·미국 상장 주식을 검색하고 가상으로 매매해보세요.</p></div><span class="data-chip">종목 시세</span></div>
+      <section class="card" style="margin-bottom:15px">
+        <div class="card-heading"><div><h2 class="card-title">전체 종목 검색</h2><p class="card-description">종목명이나 티커로 한국·미국 주식을 찾으세요.</p></div><span class="tiny-label" id="stock-catalog-count">목록 로딩 전</span></div>
+        <div class="stock-search"><input id="stock-search" type="search" maxlength="60" placeholder="가상 회사명 또는 티커 검색 · 예: 미르에너지, Lumen Orbit" autocomplete="off" aria-label="가상 회사명 또는 티커 검색"><select id="stock-search-market" aria-label="검색 시장"><option value="ALL">전체 가상 회사</option><option value="KR">한국 가상 주식</option><option value="US">미국 가상 주식</option></select></div>
+        <p class="stock-search-status" id="stock-search-status" role="status">종목명이나 티커를 입력하세요. 장이 닫혀 있으면 최근 종가를 불러오며 주문은 잠깁니다.</p>
+        <div class="stock-results" id="stock-search-results" aria-live="polite"></div>
+      </section>
+      <div class="layout">
+        <section class="card">
+          <div class="card-heading"><div><h2 class="card-title">리그 인기 종목</h2><p class="card-description">참가자들이 보유하거나 검색한 종목을 만나보세요.</p></div><div class="market-tabs"><button class="active" data-market="ALL">전체</button><button data-market="KR">한국</button><button data-market="US">미국</button></div></div>
+          <div class="market-tabs popularity-tabs" aria-label="인기 종목 정렬"><button class="active" type="button" data-popularity="holders" aria-pressed="true">많이 보유한</button><button type="button" data-popularity="searches" aria-pressed="false">많이 검색한</button></div>
+            <p class="popularity-hint"></p><div class="empty popularity-empty" hidden></div>
+          <div class="table-scroll"><table class="market-table"><thead><tr><th>종목</th><th class="price-heading">시세</th><th>변동률</th><th>시장</th><th></th></tr></thead><tbody id="market-rows-secondary"></tbody></table></div>
+        </section>
+        <aside class="card trade-panel">
+          <div class="card-heading"><div><h2 class="card-title">주문하기</h2><p class="card-description">보유 현금 내에서만 거래됩니다.</p></div></div>
+          <div class="trade-symbol"><span id="trade-badge" class="trade-big-badge">—</span><div><div class="asset-name" id="trade-name">종목을 선택하세요</div><div class="trade-price" id="trade-price">시장 목록의 주문 버튼을 눌러주세요.</div></div></div>
+          <div class="segmented"><button class="buy active" data-side="buy" type="button">매수</button><button class="sell" data-side="sell" type="button">매도</button></div>
+          <label class="field">주문 수량<input id="order-quantity" type="number" min="1" step="1" value="1"></label>
+          <div class="order-preview"><div class="preview-row"><span>주문 예상 금액</span><strong id="order-value">—</strong></div><div class="preview-row"><span>사용 가능 현금</span><strong id="available-cash">—</strong></div></div>
+          <button id="trade-submit" class="primary trade-submit" type="button">참가 후 주문하기</button>
+          <p id="trade-status" class="inline-status" role="status">먼저 리그 참가 후 주문할 수 있습니다.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="portfolio-view" class="view">
+      <div class="view-head"><div><h2>내 투자</h2><p>1,000만원으로 시작한 가상 계좌와 매매 기록.</p></div><span class="data-chip"><i class="data-dot"></i> PAPER ACCOUNT</span></div>
+      <div class="subgrid">
+        <section class="card">
+          <div class="card-heading"><div><h2 class="card-title">자산 현황</h2><p class="card-description">대출 원금과 발생 이자를 차감한 순자산입니다.</p></div></div>
+          <div class="tiny-label">NET EQUITY · KRW</div><div class="portfolio-total" id="portfolio-total">₩10,000,000</div>
+          <div class="portfolio-meta"><span>수익률 <strong id="portfolio-return">0.00%</strong></span><span>수익금 <strong id="portfolio-profit">₩0</strong></span><span>USD/KRW <strong id="portfolio-fx">₩1,380</strong></span></div>
+          <div class="currency-panel" style="margin-top:18px"><div><div class="currency-label">CASH · KRW</div><div class="currency-amount" id="portfolio-krw">₩10,000,000</div></div><div class="swap">+</div><div><div class="currency-label">CASH · USD</div><div class="currency-amount" id="portfolio-usd">$0.00</div></div></div>
+        </section>
+        <section class="card"><div class="card-heading"><div><h2 class="card-title">보유 종목</h2><p class="card-description">보유 종목의 원화 평가 금액입니다.</p></div></div><div id="portfolio-holdings" class="holdings"></div></section>
+      </div>
+      <section class="card" id="loan-card" style="margin-top:15px">
+        <div class="card-heading"><div><h2 class="card-title">가상 대출 · 연 8%</h2><p class="card-description">자기자본만큼 빌리고, 원화로 상환하세요.</p></div></div>
+        <dl class="loan-summary">
+          <div><dt>대출 원금</dt><dd id="loan-principal">₩0</dd></div>
+          <div><dt>추가 대출 가능</dt><dd id="loan-credit">—</dd></div>
+          <div><dt>발생 이자 · 납부 전</dt><dd id="loan-accrued">₩0</dd></div>
+          <div><dt>미납 이자</dt><dd id="loan-due">₩0</dd></div>
+        </dl>
+        <p class="loan-terms">한도는 현금과 주식 평가액에서 대출·이자를 뺀 자기자본입니다. 대출 잔액을 포함해 이 한도까지 빌릴 수 있습니다.<br>이자는 연 8%, 실제 이용 기간을 365일 기준으로 계산하며 매월 첫 대출일에 원화에서 자동 납부됩니다. 해당 날짜가 없는 달은 말일에 납부합니다.</p>
+        <p class="loan-terms" id="loan-billing">대출 후 납부일이 표시됩니다.</p>
+        <p class="loan-terms">원화가 부족하면 미납 이자가 쌓이고 추가 대출·매수·달러 환전이 제한됩니다. 매도와 원화 환전, 상환은 가능합니다. <strong class="negative">총자산이 대출 원금과 누적 이자 이하가 되면 파산하며, 이번 시즌에 재참가할 수 없습니다.</strong></p>
+        <p class="loan-terms" id="loan-season">Universe 2 상시 시즌 · 가상 시장은 주말에도 매분 갱신됩니다.</p>
+        <label class="field">대출·상환 금액 (원)<input id="loan-amount" type="number" inputmode="numeric" min="1" step="1" placeholder="원화 금액 입력"></label>
+        <div class="loan-actions"><button id="loan-borrow" class="primary" type="button">대출받기</button><button id="loan-repay" class="secondary" type="button">일부 상환</button><button id="loan-repay-all" class="secondary" type="button">전액 상환</button></div>
+        <p class="inline-status" id="loan-status" role="status"></p>
+        <div class="loan-history" id="loan-history"></div>
+      </section>
+      <section class="card" style="margin-top:15px">
+        <div class="card-heading"><div><h2 class="card-title">최근 거래</h2><p class="card-description">가상 거래 내역</p></div></div>
+        <div class="table-scroll"><table class="history"><thead><tr><th>날짜</th><th>구분</th><th>종목</th><th>수량</th><th>체결가</th><th>합계</th></tr></thead><tbody id="history-rows"></tbody></table></div>
+      </section>
+    </section>
+
+    <section id="records-view" class="view">
+      <div class="view-head"><div><h2>명예의 전당</h2><p>시즌 최고·최저 수익률과 학교별 순위 기록.</p></div><span class="data-chip"><i class="data-dot"></i> SEASON 01</span></div>
+      <section class="card">
+        <div class="card-heading"><div><h2 class="card-title">이번 시즌 개인 기록</h2><p class="card-description">최고와 최저 기록은 참가자 전체의 수익률을 비교합니다.</p></div></div>
+        <div id="hall-of-fame-full" class="halls"></div>
+        <p class="privacy-note">명예의 전당에는 별명·학교·수익률이 표시됩니다. 실명이나 연락처는 입력하지 마세요.</p>
+      </section>
+      <section class="card" style="margin-top:15px"><div class="card-heading"><div><h2 class="card-title">학교 대항 순위</h2><p class="card-description">학교별 수익금 합계와 참가자 평균 수익률.</p></div></div><div id="school-leaderboard-full" class="leader-list"></div></section>
+    </section>
+
+    <footer class="footer"><span>CAMPUS LEAGUE · 가상 투자 게임</span><span>모든 거래와 환전은 가상으로 진행됩니다.</span></footer>
+  </div>
+  <dialog class="school-dialog" id="school-dialog" aria-labelledby="school-dialog-title">
+    <div class="school-dialog-content">
+      <div class="school-dialog-head"><div><p class="school-dialog-kicker">FIND YOUR CAMPUS</p><h2 class="school-dialog-title" id="school-dialog-title">학교 선택</h2><p class="school-dialog-description">학교를 검색해 선택하세요. 목록에 없는 학교도 직접 추가해 참가할 수 있습니다.</p></div><button class="school-dialog-close" id="close-school-dialog" type="button" aria-label="학교 선택창 닫기">×</button></div>
+      <label class="school-search-wrap" for="school-search"><span aria-hidden="true">⌕</span><input id="school-search" type="search" maxlength="80" placeholder="학교명 검색 · 예: 부산대학교" autocomplete="off"></label>
+      <p class="school-choice-hint" id="school-choice-hint" aria-live="polite">목록에서 고르거나, 검색창에 학교 이름을 입력해 직접 추가하세요.</p>
+      <div class="school-choice-list" id="school-choice-list" role="listbox" aria-label="참가 가능한 학교"></div>
+      <div class="school-dialog-foot"><span>학교 소속은 별도로 인증하지 않습니다.</span><button class="secondary" id="cancel-school-picker" type="button">닫기</button></div>
+    </div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = "universe2-local-demo-v1";
+      const STARTING_CAPITAL = 10000000;
+      const COMMON_SCHOOLS = ["가천대학교","가톨릭대학교","강남대학교","강릉원주대학교","강원대학교","건국대학교","건양대학교","경기대학교","경남대학교","경북대학교","경상국립대학교","경성대학교","경운대학교","경일대학교","경희대학교","계명대학교","고려대학교","공주대학교","광운대학교","광주과학기술원","광주대학교","국민대학교","군산대학교","금오공과대학교","꽃동네대학교","나사렛대학교","남서울대학교","단국대학교","대구가톨릭대학교","대구대학교","대구경북과학기술원","대전대학교","덕성여자대학교","동국대학교","동덕여자대학교","동명대학교","동서대학교","동아대학교","동의대학교","명지대학교","목원대학교","목포대학교","목포해양대학교","배재대학교","백석대학교","부경대학교","부산가톨릭대학교","부산대학교","부산외국어대학교","삼육대학교","상명대학교","서강대학교","서경대학교","서울과학기술대학교","서울교육대학교","서울대학교","서울시립대학교","서울여자대학교","선문대학교","성결대학교","성공회대학교","성균관대학교","성신여자대학교","세명대학교","세종대학교","수원대학교","숙명여자대학교","순천대학교","순천향대학교","숭실대학교","신라대학교","아주대학교","안동대학교","연세대학교","영남대학교","우석대학교","우송대학교","울산대학교","원광대학교","을지대학교","이화여자대학교","인제대학교","인천대학교","인하대학교","전남대학교","전북대학교","제주대학교","조선대학교","중앙대학교","중부대학교","중원대학교","창원대학교","청주대학교","초당대학교","충남대학교","충북대학교","포항공과대학교","한국공학대학교","한국교원대학교","한국교통대학교","한국기술교육대학교","한국외국어대학교","한국항공대학교","한국해양대학교","한경국립대학교","한남대학교","한동대학교","한림대학교","한밭대학교","한서대학교","한성대학교","한세대학교","한양대학교","협성대학교","호남대학교","호서대학교","홍익대학교","경희사이버대학교","고려사이버대학교","글로벌사이버대학교","대구사이버대학교","부산디지털대학교","사이버한국외국어대학교","서울디지털대학교","서울사이버대학교","세종사이버대학교","숭실사이버대학교","원광디지털대학교","한국방송통신대학교","한양사이버대학교","경기과학기술대학교","경남정보대학교","대구공업대학교","대전보건대학교","동양미래대학교","명지전문대학","배화여자대학교","부산경상대학교","부산여자대학교","삼육보건대학교","서울예술대학교","서일대학교","숭의여자대학교","영남이공대학교","영진전문대학교","인덕대학교","인하공업전문대학","한국폴리텍대학교","한양여자대학교","한국예술종합학교"];
+      const QUOTE_WORKER_URL = window.UNIVERSE2_CONFIG?.quoteWorkerUrl || "";
+      const DEFAULT_STOCK_SYMBOLS = new Set(["V2K001","V2K002","V2K003","V2K004","V2U001","V2U002","V2U003","V2U004"]);
+      const stockCatalog = { KR:null, US:null };
+      const stockCatalogPromises = { KR:null, US:null };
+      const pinnedSearchSymbols = new Set();
+      let USDKRW = 1380;
+      const assets = [
+        { symbol:"V2K001", code:"KOSPI", name:"미르에너지", market:"KR", currency:"KRW", price:48200, change:0, badge:"미르", freshness:"demo", tradable:false, asOf:null },
+        { symbol:"V2K002", code:"KOSDAQ", name:"별빛바이오", market:"KR", currency:"KRW", price:31750, change:0, badge:"별빛", freshness:"demo", tradable:false, asOf:null },
+        { symbol:"V2K003", code:"KOSPI", name:"달무리모빌리티", market:"KR", currency:"KRW", price:126000, change:0, badge:"달무리", freshness:"demo", tradable:false, asOf:null },
+        { symbol:"V2K004", code:"KOSDAQ", name:"청해로보틱스", market:"KR", currency:"KRW", price:76500, change:0, badge:"청해", freshness:"demo", tradable:false, asOf:null },
+        { symbol:"V2U001", code:"NASDAQ", name:"Lumen Orbit", market:"US", currency:"USD", price:84.2, change:0, badge:"LO", freshness:"demo", tradable:false, asOf:null },
+        { symbol:"V2U002", code:"NASDAQ", name:"Northstar Bio", market:"US", currency:"USD", price:42.75, change:0, badge:"NB", freshness:"demo", tradable:false, asOf:null },
+        { symbol:"V2U003", code:"NYSE", name:"Copperfield Mobility", market:"US", currency:"USD", price:136.4, change:0, badge:"CM", freshness:"demo", tradable:false, asOf:null },
+        { symbol:"V2U004", code:"NASDAQ", name:"Bluehaven Robotics", market:"US", currency:"USD", price:67.3, change:0, badge:"BR", freshness:"demo", tradable:false, asOf:null }
+      ];
+      let state = { profile:null, wallet:{krw:STARTING_CAPITAL,usd:0}, trades:[], holdings:[], loan:null, joinedAt:null };
+      let actionBusy = false, editingProfile = false, overviewRequest = null, connectionMessage = "", fxAsOf = null;
+      let selectedAsset = assets[0];
+      let selectedSide = "buy";
+      let activeMarket = "ALL";
+      let activePopularity = "holders", popularityChosen = false, popularNamesLoading = false;
+      const recordedStockSearches = new Set();
+      let toastTimer = 0;
+      let stockSearchTimer = 0;
+      let stockSearchGeneration = 0;
+      let nicknameCheckTimer = 0;
+      let nicknameCheckRequest = 0;
+      let remoteClient = null, remoteMode = false, remoteSummary = null, authUser = null, authGateMessage = "";
+      let fxFreshness = "demo", fxTradable = false;
+
+      // Account data is authoritative in the database, never in browser storage.
+      function saveState() {}
+      function setConnectionMessage(message) {
+        connectionMessage = message;
+        document.getElementById("data-notice").hidden = !message;
+        document.getElementById("data-notice-copy").textContent = message;
+      }
+      function safeMessage(error) {
+        const message = String(error?.message || "");
+        return /^[가-힣]/.test(message) && message.length < 150 ? message : "연결이 원활하지 않아요. 잠시 후 다시 시도해주세요.";
+      }
+      async function submitAction(kind, payload) {
+        if (!remoteClient || !hasKakaoIdentity(authUser) || !state.profile) throw new Error("로그인 후 리그에 참가해주세요.");
+        const key = "campus-pending:" + authUser.id;
+        let pending;
+        try { pending = JSON.parse(localStorage.getItem(key)); } catch {}
+        if (pending && (pending.kind !== kind || JSON.stringify(pending.payload) !== JSON.stringify(payload))) {
+          throw new Error("이전 요청의 결과를 확인해야 해요. 같은 수량과 종목으로 다시 눌러 확인해주세요.");
+        }
+        pending ||= { id:crypto.randomUUID(), kind, payload };
+        // Persist the receipt ID before sending; a lost response can safely be retried after reload.
+        try { localStorage.setItem(key, JSON.stringify(pending)); }
+        catch { throw new Error("브라우저 저장 공간을 사용할 수 없어 주문할 수 없어요."); }
+        const { data, error } = await remoteClient.rpc("submit_campus_action", {
+          p_request_id:pending.id, p_kind:kind, p_payload:payload,
+        });
+        if (error) {
+          if (error.code && !["57014", "08006"].includes(error.code) && !String(error.code).startsWith("PGRST")) localStorage.removeItem(key);
+          throw error;
+        }
+        localStorage.removeItem(key);
+        if (data?.ok === false) { void refreshRemotePortfolio().catch(() => {}); throw new Error(data.message || "요청을 처리할 수 없어요."); }
+        return data;
+      }
+      async function runAction(work) {
+        if (actionBusy) return;
+        actionBusy = true; render();
+        try { await work(); }
+        catch (error) { toast(safeMessage(error)); }
+        finally { actionBusy = false; render(); }
+      }
+      function formatKRW(n) { return "₩" + Math.round(n || 0).toLocaleString("ko-KR"); }
+      function formatFX(n) { return "₩" + Number(n || 0).toLocaleString("ko-KR",{minimumFractionDigits:1,maximumFractionDigits:2}); }
+      function formatUSD(n) { return "$" + Number(n || 0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+      function quoteContext(asset) {
+        if (asset.freshness === "demo") return "시세 대기";
+        if (asset.source === "SIMULATED_UNIVERSE2") return "가상 시세 · 매분 변동";
+        if (asset.freshness === "real_time") return "실시간";
+        if (asset.freshness === "end_of_day") {
+          const date = asset.asOf ? new Date(asset.asOf).toLocaleDateString("ko-KR", { timeZone:"Asia/Seoul", year:"numeric", month:"2-digit", day:"2-digit" }) : "최근 거래일";
+          return "장 마감 · " + date + " 종가";
+        }
+        if (asset.freshness === "delayed") return "지연 시세";
+        return "참고 시세";
+      }
+      function quoteExpired(asset) {
+        if (!asset || asset.freshness === "demo" || !asset.asOf) return true;
+        const asOf = Date.parse(asset.asOf);
+        return !Number.isFinite(asOf) || asOf > Date.now() + 60000 || Date.now() - asOf > (asset.freshness === "end_of_day" ? 7*86400000 : 120000);
+      }
+      async function ensureStockCatalog(market) {
+        const markets = market === "ALL" ? ["KR","US"] : [market];
+        const manifestResponse = await fetch(new URL("./data/stocks-manifest.json", document.baseURI), { cache:"force-cache" });
+        if (!manifestResponse.ok) throw new Error("종목 목록을 불러오지 못했어요.");
+        const manifest = await manifestResponse.json();
+        const loaded = await Promise.all(markets.map(async key => {
+          if (stockCatalog[key]) return stockCatalog[key];
+          if (!stockCatalogPromises[key]) {
+            stockCatalogPromises[key] = (async () => {
+              const files = manifest.markets?.[key]?.files || [];
+              const parts = await Promise.all(files.map(async file => {
+                const response = await fetch(new URL("./data/" + file, document.baseURI), { cache:"force-cache" });
+                if (!response.ok) throw new Error(key + " 종목 목록을 불러오지 못했어요.");
+                const lines = (await response.text()).trim().split(/\r?\n/);
+                if (lines.length < 2) return [];
+                const headers = lines[0].split("\t");
+                return lines.slice(1).map(line => {
+                  const values = line.split("\t");
+                  return Object.fromEntries(headers.map((header,index) => [header,values[index] || ""]));
+                });
+              }));
+              stockCatalog[key] = parts.flat();
+              return stockCatalog[key];
+            })().catch(error => { stockCatalogPromises[key] = null; throw error; });
+          }
+          return stockCatalogPromises[key];
+        }));
+        const counts = ["KR","US"].map(key => {
+          const count = stockCatalog[key]?.length || manifest.markets?.[key]?.count || 0;
+          return (key === "KR" ? "한국 " : "미국 ") + count.toLocaleString("ko-KR") + "개";
+        });
+        document.getElementById("stock-catalog-count").textContent = counts.join(" · ");
+        return loaded.flat();
+      }
+      function scheduleStockSearch() {
+        clearTimeout(stockSearchTimer);
+        stockSearchTimer = setTimeout(() => renderStockSearch(), 160);
+      }
+      async function renderStockSearch() {
+        const input = document.getElementById("stock-search");
+        const results = document.getElementById("stock-search-results");
+        const status = document.getElementById("stock-search-status");
+        if (!input || !results || !status) return;
+        const query = input.value.trim().toLocaleLowerCase("ko-KR");
+        const market = document.getElementById("stock-search-market").value;
+        const generation = ++stockSearchGeneration;
+        if (!query) {
+          results.replaceChildren();
+          status.textContent = "종목명이나 티커를 입력하세요. 장이 닫혀 있으면 최근 종가를 불러오며 주문은 잠깁니다.";
+          return;
+        }
+        status.textContent = "전체 종목 목록에서 검색 중…";
+        try {
+          const all = await ensureStockCatalog(market);
+          if (generation !== stockSearchGeneration) return;
+          const matched = all.filter(item =>
+            item.symbol.toLocaleLowerCase("en-US").includes(query) ||
+            item.name.toLocaleLowerCase("ko-KR").includes(query) ||
+            item.english_name.toLocaleLowerCase("en-US").includes(query)
+          );
+          matched.sort((a,b) => {
+            const score = item => item.symbol.toLocaleLowerCase("en-US") === query ? 0 :
+              item.name.toLocaleLowerCase("ko-KR").startsWith(query) || item.english_name.toLocaleLowerCase("en-US").startsWith(query) ? 1 : 2;
+            return score(a)-score(b) || a.name.localeCompare(b.name,"ko");
+          });
+          const shown = matched.slice(0,25);
+          status.textContent = matched.length
+            ? matched.length + "개 검색됨 · 먼저 25개를 표시합니다. 선택하면 현재가를 불러옵니다."
+            : "검색 결과가 없습니다. 종목명이나 티커를 다시 확인하세요.";
+          results.innerHTML = shown.map(item =>
+            '<article class="stock-result"><div style="min-width:0"><div class="stock-result-name">' + escapeHTML(item.name) + '</div><div class="stock-result-meta">' +
+            escapeHTML(item.exchange_name) + ' · ' + escapeHTML(item.symbol) + (item.english_name ? ' · ' + escapeHTML(item.english_name) : '') +
+            '</div></div><button class="stock-result-action" type="button" data-quote-symbol="' + escapeHTML(item.symbol) + '" data-quote-market="' + escapeHTML(item.market) +
+            '" data-quote-exchange="' + escapeHTML(item.exchange) + '" data-quote-exchange-name="' + escapeHTML(item.exchange_name) + '" data-quote-name="' + escapeHTML(item.name) + '">현재가 조회</button></article>'
+          ).join("");
+          results.querySelectorAll("[data-quote-symbol]").forEach(button => button.addEventListener("click", () => {
+            lookupSearchQuote({
+              symbol:button.dataset.quoteSymbol,
+              market:button.dataset.quoteMarket,
+              exchange:button.dataset.quoteExchange,
+              exchange_name:button.dataset.quoteExchangeName,
+              name:button.dataset.quoteName,
+            }, button);
+          }));
+        } catch (error) {
+          if (generation !== stockSearchGeneration) return;
+          results.replaceChildren();
+          status.textContent = "종목 목록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.";
+        }
+      }
+      function registerQuoteAsset(quote, listing = null) {
+        if (!quote || !Number.isFinite(Number(quote.price)) || Number(quote.price) <= 0) return null;
+        let asset = assets.find(item => item.symbol === quote.symbol);
+        if (!asset) {
+          asset = {
+            symbol:quote.symbol,
+            code:listing ? (listing.market === "KR" ? listing.exchange_name : listing.exchange) : (quote.market === "KR" ? "KRX" : "US"),
+            name:listing?.name || quote.name || quote.symbol,
+            market:quote.market,
+            currency:quote.currency,
+            price:Number(quote.price),
+            change:Number(quote.change_pct || 0),
+            badge:quote.market === "KR" ? quote.symbol.slice(-2) : quote.symbol.slice(0,3),
+            freshness:quote.freshness || "delayed",
+            tradable:Boolean(quote.is_tradable),
+            asOf:quote.as_of || null,
+            source:quote.source || "",
+          };
+          assets.push(asset);
+        } else {
+          asset.name = listing?.name || quote.name || asset.name;
+          if (listing) asset.code = listing.market === "KR" ? listing.exchange_name : listing.exchange;
+          asset.market = quote.market || asset.market;
+          asset.currency = quote.currency || asset.currency;
+          asset.price = Number(quote.price);
+          asset.change = Number(quote.change_pct || 0);
+          asset.freshness = quote.freshness || "delayed";
+          asset.tradable = Boolean(quote.is_tradable);
+          asset.asOf = quote.as_of || null;
+          asset.source = quote.source || "";
+        }
+        return asset;
+      }
+      function syncRemoteQuoteAssets() {
+        if (!remoteSummary || !Array.isArray(remoteSummary.quotes)) return;
+        const needed = new Set([
+          ...DEFAULT_STOCK_SYMBOLS,
+          ...pinnedSearchSymbols,
+          ...(state.holdings || []).map(holding => holding.symbol),
+          ...(remoteSummary.popular_stocks || []).map(item => item.symbol),
+        ]);
+        remoteSummary.quotes.forEach(quote => {
+          if (needed.has(quote.symbol)) {
+            const listing = stockCatalog[quote.market]?.find(item => item.symbol === quote.symbol);
+            registerQuoteAsset(quote, listing);
+          }
+        });
+      }
+      function pinSearchSymbol(symbol) {
+        pinnedSearchSymbols.add(symbol);
+        while (pinnedSearchSymbols.size > 20) {
+          const removable = [...pinnedSearchSymbols].find(item => signedShares(item) <= 0);
+          if (!removable) break;
+          pinnedSearchSymbols.delete(removable);
+        }
+      }
+      async function recordStockSearch(symbol) {
+        if (!remoteClient || !hasKakaoIdentity(authUser)) return;
+        const userId = authUser.id;
+        const key = userId + ":" + symbol + ":" + Math.floor(Date.now()/3600000);
+        if (recordedStockSearches.has(key)) return;
+        recordedStockSearches.add(key);
+        try {
+          const { error } = await remoteClient.rpc("record_campus_stock_search", { p_symbol:symbol });
+          if (error) recordedStockSearches.delete(key);
+        } catch { recordedStockSearches.delete(key); }
+      }
+      async function lookupSearchQuote(item, button) {
+        const status = document.getElementById("stock-search-status");
+        button.disabled = true;
+        button.textContent = "조회 중…";
+        status.textContent = item.name + " 시세를 불러오는 중…";
+        try {
+          const params = new URLSearchParams({
+            market:item.market, symbol:item.symbol, exchange:item.exchange, name:item.name,
+          });
+          const response = await fetch(QUOTE_WORKER_URL + "/quote?" + params.toString(), {
+            headers:{ Accept:"application/json" }, cache:"no-store", signal:AbortSignal.timeout(30000),
+          });
+          const quote = await response.json();
+          if (!response.ok) throw new Error(response.status === 429 || response.status === 503 ? "조회가 몰리고 있어요. 15초 후 다시 시도해주세요." : "시세를 불러오지 못했어요. 잠시 후 다시 시도해주세요.");
+          const asset = registerQuoteAsset(quote, item);
+          if (!asset) throw new Error("유효한 시세가 도착하지 않았어요.");
+          if (remoteSummary) remoteSummary.quotes = [...(remoteSummary.quotes || []).filter(q => q.symbol !== quote.symbol), quote];
+          void recordStockSearch(item.symbol);
+          pinSearchSymbol(item.symbol);
+          selectedAsset = asset;
+          activeMarket = item.market;
+          document.querySelectorAll("[data-market]").forEach(tab => tab.classList.toggle("active", tab.dataset.market === activeMarket));
+          if (remoteMode && remoteClient) {
+            try { await refreshRemoteOverview(); }
+            catch (_) { /* quote is already shown; Realtime will retry */ }
+          }
+          render();
+          status.textContent = quote.freshness === "end_of_day"
+            ? item.name + " 최근 종가를 불러왔어요. 장이 열리면 다시 조회해 가상 거래할 수 있습니다."
+            : item.name + " 현재가를 불러왔어요. 이 가격은 가상 거래에만 사용됩니다.";
+          renderStockSearch();
+          toast(quote.stale ? "마지막 확인 가격입니다. 갱신 후 주문해주세요." : item.name + " 시세를 불러왔어요.");
+        } catch (error) {
+          button.disabled = false;
+          button.textContent = "다시 조회";
+          status.textContent = safeMessage(error);
+          toast(status.textContent);
+        }
+      }
+      function formatReturn(n) { n = Math.abs(Number(n)) < 0.005 ? 0 : n; const sign = n > 0 ? "+" : ""; return sign + Number(n || 0).toFixed(2) + "%"; }
+      function signedClass(n) { return n > 0 ? "positive" : n < 0 ? "negative" : "muted"; }
+      function anyQuotesHaveData() { return assets.some(a => a.freshness !== "demo") || fxFreshness !== "demo"; }
+      function allQuotesHaveData() { return assets.every(a => a.freshness !== "demo") && fxFreshness !== "demo"; }
+      function allQuotesAreRealtime() { return assets.every(a => a.freshness === "real_time") && fxFreshness === "real_time"; }
+      function escapeHTML(text) { return String(text).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+
+      function normalizeSchoolName(name) { return String(name || "").trim().toLocaleLowerCase("ko-KR"); }
+      function getSchoolChoices() {
+        const liveSchools = remoteSummary && Array.isArray(remoteSummary.schools) ? remoteSummary.schools.map(item => item.school) : [];
+        const choices = new Map();
+        [...COMMON_SCHOOLS, ...liveSchools].forEach(name => {
+          const clean = String(name || "").trim();
+          if (clean.length >= 2) choices.set(normalizeSchoolName(clean), clean);
+        });
+        return Array.from(choices.values()).sort((a,b) => a.localeCompare(b, "ko"));
+      }
+      function renderSchoolChoices() {
+        const input = document.getElementById("school-search"), list = document.getElementById("school-choice-list"), hint = document.getElementById("school-choice-hint");
+        const query = input.value.trim(), normalizedQuery = normalizeSchoolName(query), choices = getSchoolChoices();
+        const exactMatch = choices.some(name => normalizeSchoolName(name) === normalizedQuery);
+        const matches = normalizedQuery ? choices.filter(name => normalizeSchoolName(name).includes(normalizedQuery)) : choices;
+        const visible = matches.slice(0,80);
+        let markup = "";
+        if (query.length >= 2 && query.length <= 80 && !exactMatch) markup += '<button class="school-option school-option-custom" type="button" role="option" data-school-choice="' + escapeHTML(query) + '"><span class="school-option-main"><span class="school-option-name">“' + escapeHTML(query) + '” 직접 등록</span><span class="school-option-meta">목록에 없어도 이 이름으로 학교를 만들고 참가할 수 있어요.</span></span><span class="school-option-check" aria-hidden="true">＋</span></button>';
+        if (visible.length) markup += visible.map(name => '<button class="school-option" type="button" role="option" data-school-choice="' + escapeHTML(name) + '"><span class="school-option-main"><span class="school-option-name">' + escapeHTML(name) + '</span><span class="school-option-meta">학교 선택</span></span><span class="school-option-check" aria-hidden="true">›</span></button>').join("");
+        if (!markup) markup = '<div class="school-empty">검색 결과가 없어요.<br>학교 이름을 2~80자로 입력하면 직접 등록할 수 있습니다.</div>';
+        list.innerHTML = markup;
+        hint.textContent = matches.length > visible.length ? "검색 결과가 많아요. 학교 이름을 더 입력해 좁혀보세요." : !query ? "대학교·전문대·사이버대 추천 목록과 이미 참가한 학교를 보여줍니다." : exactMatch ? "목록에서 학교를 선택하세요. 다른 학교 이름도 직접 추가할 수 있습니다." : "목록에 없는 학교도 직접 등록할 수 있습니다.";
+      }
+      function openSchoolPicker() {
+        const dialog = document.getElementById("school-dialog"), input = document.getElementById("school-search");
+        if (!dialog.open) { input.value = ""; renderSchoolChoices(); dialog.showModal(); }
+        window.setTimeout(() => input.focus(), 0);
+      }
+      function chooseSchool(name) {
+        const clean = String(name || "").trim();
+        if (clean.length < 2 || clean.length > 80) { toast("학교 이름은 2~80자로 입력해주세요."); return; }
+        document.getElementById("school").value = clean;
+        document.getElementById("school-picker-label").textContent = clean;
+        document.getElementById("open-school-picker").classList.add("has-value");
+        document.getElementById("school-dialog").close();
+      }
+      function setNicknameCheck(message, stateName) {
+        const node = document.getElementById("nickname-check");
+        if (!node) return;
+        node.textContent = message;
+        node.className = "nickname-check" + (stateName ? " " + stateName : "");
+      }
+      async function checkNicknameAvailability(value, verifiedUser) {
+        const nickname = String(value || "").trim(), requestId = ++nicknameCheckRequest;
+        if (nickname.length < 1 || nickname.length > 20) { setNicknameCheck("별명은 1~20자로 입력해주세요.", "error"); return false; }
+        if (!remoteClient || !remoteMode) { setNicknameCheck("카카오 로그인 후 별명 중복을 확인할 수 있어요.", "pending"); return false; }
+        setNicknameCheck("별명 중복 확인 중…", "pending");
+        try {
+          let user = verifiedUser;
+          if (!user) {
+            const { data:sessionData, error:sessionError } = await remoteClient.auth.getSession();
+            if (sessionError) throw sessionError;
+            user = sessionData && sessionData.session ? sessionData.session.user : null;
+          }
+          if (!hasKakaoIdentity(user)) {
+            if (requestId === nicknameCheckRequest) setNicknameCheck("카카오 로그인 후 별명 중복을 확인할 수 있어요.", "pending");
+            return false;
+          }
+          const { data, error } = await remoteClient.rpc("is_campus_nickname_available", { p_nickname:nickname });
+          if (error) throw error;
+          if (requestId !== nicknameCheckRequest) return false;
+          const available = data === true;
+          setNicknameCheck(available ? "사용할 수 있는 별명입니다." : "이미 사용 중인 별명입니다. 다른 별명을 입력해주세요.", available ? "available" : "taken");
+          return available;
+        } catch (_) {
+          if (requestId === nicknameCheckRequest) setNicknameCheck("별명 확인을 완료하지 못했어요. 잠시 후 다시 시도해주세요.", "error");
+          return false;
+        }
+      }
+      function toast(message) {
+        const node = document.getElementById("toast");
+        node.textContent = message;
+        node.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => node.classList.remove("show"), 2600);
+      }
+      function signedShares(symbol) {
+        return Number((state.holdings || []).find(h => h.symbol === symbol)?.quantity || 0);
+      }
+      function loanAccrued() {
+        const loan=state.loan;
+        if (!loan) return 0;
+        const elapsed=loan.bankrupt_at || loan.season_closed ? 0 : Math.max(0,Math.min(Date.now(),Date.parse(loan.season_ends_at))-Number(loan.received_at || Date.now()))/1000;
+        return Number(loan.accrued_interest || 0)+Number(loan.principal || 0)*0.08*elapsed/31536000;
+      }
+      function loanDebt() { return Number(state.loan?.principal || 0)+Number(state.loan?.interest_due || 0)+loanAccrued(); }
+      function playClosed() { return Boolean(state.loan?.bankrupt_at || state.loan?.season_closed || remoteSummary?.season?.closed); }
+      function hasUnpaidInterest() { return Number(state.loan?.interest_due || 0)>0; }
+      function metrics() {
+        const positions = assets.map(asset => {
+          
+          const shares = signedShares(asset.symbol);
+          const valueNative = shares * asset.price;
+          const valueKrw = asset.currency === "USD" ? valueNative * USDKRW : valueNative;
+          
+          return { asset, shares, valueNative, valueKrw };
+        }).filter(item => item.shares > 0);
+        const holdingsKrw = positions.reduce((sum, p) => sum + p.valueKrw, 0);
+        const gross = state.wallet.krw + state.wallet.usd * USDKRW + holdingsKrw;
+        const debt = loanDebt();
+        const total = state.loan?.final_equity != null ? Number(state.loan.final_equity) : gross-debt;
+        const profit = total - STARTING_CAPITAL;
+        return { positions,gross,total,profit,returnPct:profit/STARTING_CAPITAL*100 };
+      }
+      function displayPrice(asset) { if (asset.freshness === "demo") return "—"; return asset.currency === "USD" ? formatUSD(asset.price) : formatKRW(asset.price); }
+      function renderPopularityControls() {
+        document.querySelectorAll("[data-popularity]").forEach(button => {
+          const active = button.dataset.popularity === activePopularity;
+          button.classList.toggle("active", active); button.setAttribute("aria-pressed", String(active));
+        });
+        document.querySelectorAll(".popularity-hint").forEach(node => {
+          node.textContent = activePopularity === "searches"
+            ? "최근 7일 검색 결과에서 시세를 조회한 인원순 · 같은 사람은 한 번만 집계"
+            : "현재 1주 이상 보유한 인원순 · 리그 전체 기준";
+        });
+      }
+      function renderAssetRows(targetId) {
+        const tbody = document.getElementById(targetId);
+        const field = activePopularity === "searches" ? "search_count" : "holder_count";
+        const other = activePopularity === "searches" ? "holder_count" : "search_count";
+        const popular = (remoteSummary?.popular_stocks || [])
+          .filter(p => Number(p[field]) > 0 && (activeMarket === "ALL" || p.market === activeMarket))
+          .sort((a,b) => Number(b[field])-Number(a[field]) || Number(b[other])-Number(a[other]) || a.symbol.localeCompare(b.symbol));
+        const visible = popular.map(p => assets.find(a => a.symbol === p.symbol)).filter(Boolean);
+        const container = tbody.closest(".card");
+        const empty = container?.querySelector(".popularity-empty");
+        if (empty) {
+          empty.hidden = visible.length > 0;
+          empty.textContent = !remoteSummary ? "인기 종목을 불러오고 있어요." : !Array.isArray(remoteSummary.popular_stocks)
+            ? "인기 종목을 잠시 불러오지 못했어요. 전체 종목 검색을 이용해주세요."
+            : activePopularity === "holders" ? "아직 보유 중인 종목이 없어요. 많이 검색한 종목을 보거나 직접 검색해보세요."
+            : "최근 검색된 종목이 없어요. 전체 종목 검색에서 첫 종목을 찾아보세요.";
+        }
+        const table = tbody.closest(".table-scroll");
+        if (table) table.hidden = !visible.length;
+        tbody.replaceChildren();
+        (targetId === "market-rows" ? visible.slice(0,4) : visible.slice(0,20)).forEach(asset => {
+          const tr = document.createElement("tr");
+          const changeClass = signedClass(asset.change);
+          const orderDisabled = !asset.tradable || quoteExpired(asset);
+          tr.innerHTML = '<td><div class="asset"><span class="asset-badge">' + escapeHTML(asset.badge) + '</span><span><span class="asset-name">' + escapeHTML(asset.name) + '</span><span class="asset-meta">' + escapeHTML(asset.symbol) + ' · ' + asset.code + '</span><span class="asset-popularity">' + (popular.find(p => p.symbol === asset.symbol)?.[field] || 0).toLocaleString("ko-KR") + (activePopularity === "searches" ? '명 검색 · 최근 7일' : '명 보유') + '</span></span></div></td><td class="quote-price">' + displayPrice(asset) + '<span class="quote-context">' + escapeHTML(quoteContext(asset)) + '</span></td><td class="' + changeClass + '">' + formatReturn(asset.change) + '</td><td>' + (asset.market === "KR" ? "한국" : "미국") + '</td><td><button class="table-action" data-symbol="' + asset.symbol + '"' + (orderDisabled ? ' disabled title="장 마감 참고 가격은 주문할 수 없습니다."' : '') + '>주문</button></td>';
+          tbody.append(tr);
+        });
+        tbody.querySelectorAll("[data-symbol]").forEach(button => button.addEventListener("click", () => {
+          selectedAsset = assets.find(a => a.symbol === button.dataset.symbol);
+          renderTradePanel();
+          goToView("market");
+        }));
+      }
+      function renderLeaderboard() {
+        const nodeIds = ["school-leaderboard","school-leaderboard-full"];
+        const nodes = nodeIds.map(id => document.getElementById(id));
+        if (remoteMode && remoteSummary) {
+          const schools = remoteSummary.schools || [];
+          const html = schools.length ? schools.map((school,index) =>
+            '<div class="leader-row"><span class="rank ' + (index===0 ? "first" : "") + '">' + String(index+1).padStart(2,"0") + '</span><div><div class="leader-school">' + escapeHTML(school.school) + '</div><div class="leader-count">' + Number(school.players).toLocaleString("ko-KR") + '명 참가</div></div><div class="leader-score"><div class="leader-profit ' + signedClass(school.profit_krw) + '">' + (school.profit_krw >= 0 ? "+" : "−") + formatKRW(Math.abs(school.profit_krw)) + '</div><div class="leader-return ' + signedClass(school.avg_return_pct) + '">평균 ' + formatReturn(school.avg_return_pct) + '</div></div></div>'
+          ).join("") : '<div class="empty">아직 참가한 학교가 없습니다.<br>첫 번째 학교가 되어보세요.</div>';
+          nodes.forEach((node,index) => { node.innerHTML = html; if (index === 0) [...node.children].slice(5).forEach(row => row.remove()); });
+          document.getElementById("stat-school").textContent = state.profile ? state.profile.school : (schools[0] ? schools[0].school : "참가 전");
+          return;
+        }
+        nodes.forEach(node => { node.innerHTML = '<div class="empty">학교별 참가 현황과 수익률이 표시됩니다.</div>'; });
+        document.getElementById("stat-school").textContent = state.profile ? state.profile.school : "참가 전";
+      }
+      function renderHalls() {
+        const m = metrics();
+        const enabled = remoteMode && state.profile && state.trades.length > 0;
+        const best = remoteMode && remoteSummary ? remoteSummary.best : null;
+        const worst = remoteMode && remoteSummary ? remoteSummary.worst : null;
+        const maxName = best ? best.nickname : enabled ? state.profile.nickname : "기록 대기 중";
+        const maxSchool = best ? best.school : enabled ? state.profile.school : "—";
+        const returnText = best ? formatReturn(best.return_pct) : enabled ? formatReturn(m.returnPct) : "—";
+        const cls = best ? signedClass(best.return_pct) : enabled ? signedClass(m.returnPct) : "muted";
+        const worstName = worst ? worst.nickname : enabled ? state.profile.nickname : "기록 대기 중";
+        const worstSchool = worst ? worst.school : enabled ? state.profile.school : "—";
+        const worstReturn = worst ? formatReturn(worst.return_pct) : enabled ? formatReturn(m.returnPct) : "—";
+        const worstClass = worst ? signedClass(worst.return_pct) : enabled ? signedClass(m.returnPct) : "muted";
+        const cards = '<article class="hall"><p class="hall-kicker">↗ BEST · 최고 수익률</p><span class="hall-avatar">✦</span><div class="hall-name">' + escapeHTML(maxName) + '</div><div class="hall-school">' + escapeHTML(maxSchool) + '</div><div class="hall-return ' + cls + '">' + returnText + '</div></article>' +
+          '<article class="hall"><p class="hall-kicker">↘ CHALLENGE · 최저 수익률</p><span class="hall-avatar" style="color:#ff9d97;background:rgba(255,125,120,.08)">⌁</span><div class="hall-name">' + escapeHTML(worstName) + '</div><div class="hall-school">' + escapeHTML(worstSchool) + '</div><div class="hall-return ' + worstClass + '">' + worstReturn + '</div></article>';
+        document.getElementById("hall-of-fame").innerHTML = cards;
+        document.getElementById("hall-of-fame-full").innerHTML = cards;
+      }
+      function renderHoldings(targetId) {
+        const node = document.getElementById(targetId);
+        const positions = metrics().positions;
+        if (!positions.length) {
+          node.innerHTML = '<div class="empty">아직 보유한 종목이 없어요.</div>';
+          return;
+        }
+        node.innerHTML = positions.map(p => '<div class="holding"><div><div class="holding-name">' + escapeHTML(p.asset.name) + '</div><div class="holding-shares">' + p.shares + '주 · ' + p.asset.symbol + '</div></div><div class="holding-value">' + formatKRW(p.valueKrw) + '</div></div>').join("");
+      }
+      function renderHistory() {
+        const node = document.getElementById("history-rows");
+        const recent = [...state.trades].reverse().slice(0,20);
+        if (!recent.length) {
+          node.innerHTML = '<tr><td colspan="6" class="muted" style="text-align:center;padding:22px">아직 매매 기록이 없습니다.</td></tr>';
+          return;
+        }
+        node.innerHTML = recent.map(t => {
+          const asset = assets.find(a => a.symbol === t.symbol);
+          const date = new Intl.DateTimeFormat("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(t.at));
+          const total = t.price * t.quantity;
+          return '<tr><td>' + date + '</td><td class="' + (t.side === "buy" ? "positive" : "negative") + '">' + (t.side === "buy" ? "매수" : "매도") + '</td><td><strong>' + escapeHTML(asset ? asset.name : t.symbol) + '</strong></td><td>' + t.quantity + '주</td><td>' + (t.currency === "USD" ? formatUSD(t.price) : formatKRW(t.price)) + '</td><td>' + (t.currency === "USD" ? formatUSD(total) : formatKRW(total)) + '</td></tr>';
+        }).join("");
+      }
+      function renderTradePanel() {
+        document.getElementById("trade-badge").textContent = selectedAsset.badge;
+        document.getElementById("trade-name").textContent = selectedAsset.name + " · " + selectedAsset.symbol;
+        document.getElementById("trade-price").textContent = displayPrice(selectedAsset) + " · " + quoteContext(selectedAsset);
+        const quantity = Math.max(1, Number(document.getElementById("order-quantity").value || 1));
+        const amount = quantity * selectedAsset.price;
+        const wallet = selectedAsset.currency === "USD" ? state.wallet.usd : state.wallet.krw;
+        document.getElementById("order-value").textContent = selectedAsset.currency === "USD" ? formatUSD(amount) : formatKRW(amount);
+        document.getElementById("available-cash").textContent = selectedAsset.currency === "USD" ? formatUSD(wallet) : formatKRW(wallet);
+        const submit = document.getElementById("trade-submit");
+        submit.textContent = !state.profile ? "참가 후 주문하기" : (selectedSide === "buy" ? "가상 주식 매수" : "가상 주식 매도");
+        const owned = signedShares(selectedAsset.symbol);
+        const remoteQuote = remoteMode && remoteSummary ? (remoteSummary.quotes || []).find(q => q.symbol === selectedAsset.symbol) : null;
+        const blockedByQuote = (remoteMode && (!remoteQuote || !remoteQuote.is_tradable || (selectedAsset.currency === "USD" && !fxTradable))) ||
+          (!selectedAsset.tradable && selectedAsset.freshness !== "demo") || quoteExpired(selectedAsset);
+        submit.disabled = playClosed() || (selectedSide === "buy" && hasUnpaidInterest()) || actionBusy || !state.profile || !hasKakaoIdentity(authUser) || !navigator.onLine || blockedByQuote || !Number.isInteger(quantity) || quantity < 1 || (selectedSide === "buy" ? wallet < amount : owned < quantity);
+        submit.title = blockedByQuote ? "현재가가 확인된 종목만 가상 매매할 수 있습니다." : "";
+        document.getElementById("trade-status").textContent = playClosed() ? "이번 시즌 참가가 종료됐습니다." : selectedSide === "buy" && hasUnpaidInterest() ? "미납 이자를 납부하면 매수할 수 있어요." : !state.profile
+          ? "먼저 리그 참가 후 주문할 수 있습니다."
+          : quoteExpired(selectedAsset)
+            ? "시세가 2분 이상 지났어요. 검색 결과에서 다시 조회해주세요."
+          : blockedByQuote
+            ? "장마감 종가 또는 시세가 없는 종목은 주문할 수 없습니다."
+          : selectedAsset.currency === "USD" && selectedSide === "buy" && state.wallet.usd < amount
+            ? "달러 잔액이 부족해요. 환전소에서 먼저 환전해주세요."
+            : selectedSide === "sell" && owned < quantity
+              ? "현재 보유 수량은 " + owned + "주입니다."
+              : "수수료 없는 가상 주문";
+      }
+      function hasKakaoIdentity(user) {
+        if (!user) return false;
+        const providers = user.app_metadata && user.app_metadata.providers;
+        const identities = Array.isArray(user.identities) ? user.identities : [];
+        return (user.app_metadata && user.app_metadata.provider === "kakao") ||
+          (Array.isArray(providers) && providers.includes("kakao")) ||
+          identities.some(identity => identity.provider === "kakao");
+      }
+      function updateAuthGate() {
+        const gate = document.getElementById("auth-gate");
+        const shell = document.getElementById("app-shell");
+        const button = document.getElementById("auth-gate-kakao");
+        const status = document.getElementById("auth-gate-status");
+        const accountStatus = document.getElementById("account-link-status");
+        const authenticated = remoteMode && hasKakaoIdentity(authUser);
+        if (gate) gate.hidden = authenticated;
+        if (shell) shell.toggleAttribute("inert", !authenticated);
+        if (button) {
+          button.disabled = !remoteClient || authenticated;
+          button.textContent = authUser && authUser.is_anonymous
+            ? "기존 참가 기록을 카카오에 연결"
+            : "카카오로 로그인";
+        }
+        if (status) {
+          status.textContent = authGateMessage || (authenticated
+            ? "카카오 계정으로 로그인됐습니다."
+            : !remoteMode
+              ? "로그인 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요."
+              : authUser && authUser.is_anonymous
+                ? "카카오 로그인 후 참가 기록을 이용할 수 있어요."
+                : "카카오 로그인 후 게임 별명과 학교를 등록하면 참가할 수 있어요.");
+        }
+        if (accountStatus) {
+          accountStatus.textContent = hasKakaoIdentity(authUser)
+            ? "카카오 로그인 완료 · 순위에는 게임 별명과 학교만 공개됩니다."
+            : authUser && authUser.is_anonymous
+              ? "카카오 로그인 후 참가 기록을 이용할 수 있어요."
+              : "공개 순위에는 게임 별명과 학교만 표시됩니다.";
+        }
+      }
+      async function connectKakaoAccount() {
+        try {
+          if (!remoteClient) throw new Error("지금은 로그인할 수 없습니다. 잠시 후 다시 시도해주세요.");
+          const { data, error } = await remoteClient.auth.getSession();
+          if (error) throw error;
+          const user = data && data.session ? data.session.user : null;
+          if (hasKakaoIdentity(user)) {
+            authUser = user;
+            authGateMessage = "";
+            updateAuthGate();
+            return;
+          }
+          const redirectTo = window.location.origin + window.location.pathname;
+          let result;
+          if (user && user.is_anonymous) {
+            result = await remoteClient.auth.linkIdentity({ provider:"kakao", options:{ redirectTo } });
+          } else if (user) {
+            throw new Error("현재 로그인한 계정에 카카오를 연결할 수 없습니다. 먼저 로그아웃해주세요.");
+          } else {
+            result = await remoteClient.auth.signInWithOAuth({ provider:"kakao", options:{ redirectTo } });
+          }
+          if (result.error) throw result.error;
+          authGateMessage = "카카오 로그인 화면으로 이동합니다.";
+          updateAuthGate();
+        } catch (error) {
+          authGateMessage = "카카오 로그인에 실패했어요. 잠시 후 다시 시도해주세요.";
+          updateAuthGate();
+          toast(authGateMessage);
+        }
+      }
+      function renderPending() {
+        let pending;
+        try { pending = authUser && JSON.parse(localStorage.getItem("campus-pending:" + authUser.id)); } catch {}
+        document.getElementById("pending-action").hidden = !pending;
+        if (pending) document.getElementById("pending-copy").textContent = pending.kind === "order"
+          ? pending.payload.symbol + " " + pending.payload.quantity + "주 요청의 처리 결과를 확인해주세요."
+          : pending.kind === "loan" ? "이전 대출·상환 요청의 처리 결과를 확인해주세요." : "이전 환전 요청의 처리 결과를 확인해주세요.";
+        document.getElementById("retry-pending").disabled = actionBusy;
+      }
+      document.getElementById("retry-pending").addEventListener("click", () => runAction(async () => {
+        const pending = JSON.parse(localStorage.getItem("campus-pending:" + authUser.id) || "null");
+        if (!pending) return;
+        await submitAction(pending.kind, pending.payload);
+        toast("이전 요청의 처리 결과를 확인했어요.");
+        await refreshRemotePortfolio();
+      }));
+      function renderLoan() {
+        const loan=state.loan, principal=Number(loan?.principal || 0), due=Number(loan?.interest_due || 0);
+        const credit=loan ? Math.max(0,Math.floor(metrics().total)-principal) : 0;
+        document.getElementById("loan-principal").textContent=formatKRW(principal);
+        document.getElementById("mini-loan-principal").textContent=formatKRW(principal);
+        document.getElementById("loan-credit").textContent=loan ? formatKRW(credit) : "—";
+        document.getElementById("mini-loan-credit").textContent=loan && !playClosed() && !due ? formatKRW(credit) : "—";
+        document.getElementById("loan-accrued").textContent=formatKRW(loanAccrued());
+        document.getElementById("loan-due").textContent=formatKRW(due);
+        document.getElementById("loan-due").classList.toggle("negative",due>0);
+        const next=loan?.next_due_at ? new Date(loan.next_due_at).toLocaleDateString("ko-KR",{timeZone:"Asia/Seoul"}) : null;
+        document.getElementById("loan-billing").textContent=next ? "다음 납부일: "+next+" (한국 시간 00시) · 현재 원금 기준 월 이자 약 "+formatKRW(principal*0.08/12) : "대출 후 납부일이 표시됩니다. 중도 상환 시 이용한 기간의 이자를 먼저 납부합니다.";
+        const closed=playClosed(), disabled=actionBusy || closed || !state.profile || !loan || !navigator.onLine;
+        document.getElementById("loan-borrow").disabled=disabled || due>0 || !loan?.can_borrow || credit<1;
+        document.getElementById("loan-repay").disabled=disabled || loanDebt()<=0 || state.wallet.krw<=0;
+        document.getElementById("loan-repay-all").disabled=disabled || loanDebt()<=0 || state.wallet.krw+0.005<loanDebt();
+        document.getElementById("loan-status").textContent=closed ? (loan?.bankrupt_at ? "파산 · 이번 시즌 게임 오버" : "이번 시즌이 종료됐습니다.")
+          : !state.profile ? "리그에 참가하면 대출을 이용할 수 있어요." : !loan ? "대출 정보를 불러오고 있어요." : due>0 ? "미납 이자가 있습니다. 원화 잔액이 생기면 자동 납부됩니다."
+          : !loan.can_borrow ? "자산 시세를 확인한 뒤 대출할 수 있어요." : "대출금은 수익에 포함되지 않습니다. 이자는 자기자본에서 차감됩니다.";
+        const banner=document.getElementById("loan-game-status"); banner.hidden=!closed;
+        banner.textContent=loan?.bankrupt_at ? "게임 오버 · 총자산보다 대출과 이자가 많아 파산했습니다. 현재 시즌에 재참가할 수 없습니다." : "현재 시즌이 종료됐습니다. 다음 시즌은 별도로 안내됩니다.";
+        const labels={borrow:"대출",repay:"원금 상환",interest_charge:"이자 청구",interest_payment:"이자 납부",bankruptcy:"파산 당시 순자산"};
+        document.getElementById("loan-history").innerHTML=(loan?.events || []).slice(0,8).map(e=>'<div class="loan-event"><div>'+escapeHTML(labels[e.kind] || e.kind)+'<small>'+escapeHTML(new Date(e.occurred_at).toLocaleString("ko-KR",{timeZone:"Asia/Seoul"}))+'</small></div><strong>'+formatKRW(e.amount)+'</strong></div>').join("");
+      }
+      function render() {
+        renderPending();
+        const m = metrics();
+        document.getElementById("data-mode").textContent = "가상 시세 · 365일 운영";
+        document.querySelectorAll(".price-heading").forEach(node => { node.textContent = "가상 가격 · 업데이트 시각"; });
+        setConnectionMessage(connectionMessage);
+        document.getElementById("fx-label").textContent = "가상 USD/KRW 환율";
+        document.getElementById("fx-freshness").textContent = "· " + ({ demo:"환율 확인 중", real_time:"실시간", end_of_day:"최근 거래일", delayed:"지연 시세" }[fxFreshness] || "환율");
+        const toKrw = document.getElementById("exchange-direction").value === "USD_KRW";
+        document.getElementById("exchange-submit").disabled = playClosed() || (!toKrw && hasUnpaidInterest()) || actionBusy || !state.profile || !navigator.onLine || (!toKrw && !fxTradable) || quoteExpired({freshness:fxFreshness,asOf:fxAsOf});
+        document.querySelector("#join-form button[type=submit]").disabled = actionBusy || playClosed();
+        document.getElementById("stat-assets").textContent = formatKRW(m.total);
+        document.getElementById("stat-return").textContent = formatReturn(m.returnPct);
+        document.getElementById("stat-return").className = "stat-value " + signedClass(m.returnPct);
+        document.getElementById("stat-profit").textContent = "수익금 " + (m.profit >= 0 ? "+" : "−") + formatKRW(Math.abs(m.profit));
+        document.getElementById("stat-profit").className = "stat-sub " + signedClass(m.profit);
+        document.getElementById("stat-fx").textContent = fxFreshness === "demo" ? "—" : formatFX(USDKRW);
+        document.getElementById("stat-fx-sub").textContent = ({ demo:"환율 확인 중", real_time:"실시간 환율", end_of_day:"최근 거래일 환율", delayed:"지연 환율" }[fxFreshness] || "USD/KRW 환율");
+        document.getElementById("fx-display").textContent = fxFreshness === "demo" ? "환율 확인 중" : "1 USD = " + formatFX(USDKRW);
+        document.getElementById("cash-krw").textContent = formatKRW(state.wallet.krw);
+        document.getElementById("cash-usd").textContent = formatUSD(state.wallet.usd);
+        document.getElementById("portfolio-total").textContent = formatKRW(m.total);
+        document.getElementById("portfolio-return").textContent = formatReturn(m.returnPct);
+        document.getElementById("portfolio-return").className = signedClass(m.returnPct);
+        document.getElementById("portfolio-profit").textContent = (m.profit >= 0 ? "+" : "−") + formatKRW(Math.abs(m.profit));
+        document.getElementById("portfolio-profit").className = signedClass(m.profit);
+        document.getElementById("portfolio-fx").textContent = formatFX(USDKRW);
+        document.getElementById("portfolio-krw").textContent = formatKRW(state.wallet.krw);
+        document.getElementById("portfolio-usd").textContent = formatUSD(state.wallet.usd);
+        document.getElementById("join-card").classList.toggle("hidden", Boolean(state.profile) && !editingProfile);
+        document.getElementById("profile-card").classList.toggle("hidden", !state.profile);
+        const joinCopy = document.getElementById("join-copy");
+        if (joinCopy) joinCopy.textContent = editingProfile ? "별명을 수정하세요. 참가 학교는 유지됩니다." : "별명과 학교를 등록하고 가상자금 1,000만원으로 시작하세요.";
+        
+        if (state.profile) {
+          document.getElementById("profile-name").textContent = state.profile.nickname;
+          document.getElementById("profile-school").textContent = state.profile.school;
+        }
+        renderPopularityControls();
+        renderAssetRows("market-rows");
+        renderAssetRows("market-rows-secondary");
+        renderHoldings("mini-holdings");
+        renderHoldings("portfolio-holdings");
+        renderHistory();
+        renderLoan();
+        renderLeaderboard();
+        renderHalls();
+        renderTradePanel();
+        updateAuthGate();
+      }
+      function goToView(name) {
+        document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === name + "-view"));
+        document.querySelectorAll(".nav [data-view]").forEach(button => button.classList.toggle("active", button.dataset.view === name));
+        window.scrollTo({ top:0, behavior:"smooth" });
+      }
+      document.querySelectorAll(".nav [data-view], [data-go]").forEach(button => button.addEventListener("click", () => goToView(button.dataset.view || button.dataset.go)));
+      document.querySelectorAll("[data-popularity]").forEach(button => button.addEventListener("click", () => {
+        activePopularity = button.dataset.popularity; popularityChosen = true; render();
+      }));
+      document.getElementById("stock-search").addEventListener("input", scheduleStockSearch);
+      document.getElementById("stock-search-market").addEventListener("change", scheduleStockSearch);
+      document.querySelectorAll("[data-market]").forEach(button => button.addEventListener("click", () => {
+        activeMarket = button.dataset.market;
+        document.querySelectorAll("[data-market]").forEach(other => other.classList.toggle("active", other.dataset.market === activeMarket));
+        renderAssetRows("market-rows");
+        renderAssetRows("market-rows-secondary");
+      }));
+      document.querySelectorAll("[data-side]").forEach(button => button.addEventListener("click", () => {
+        selectedSide = button.dataset.side;
+        document.querySelectorAll("[data-side]").forEach(other => other.classList.toggle("active", other.dataset.side === selectedSide));
+        button.classList.add(selectedSide);
+        renderTradePanel();
+      }));
+      document.getElementById("order-quantity").addEventListener("input", renderTradePanel);
+
+      const nicknameInput = document.getElementById("nickname"), schoolDialog = document.getElementById("school-dialog");
+      document.getElementById("open-school-picker").addEventListener("click", openSchoolPicker);
+      document.getElementById("close-school-dialog").addEventListener("click", () => schoolDialog.close());
+      document.getElementById("cancel-school-picker").addEventListener("click", () => schoolDialog.close());
+      document.getElementById("school-search").addEventListener("input", renderSchoolChoices);
+      document.getElementById("school-choice-list").addEventListener("click", event => {
+        const option = event.target.closest("[data-school-choice]");
+        if (option) chooseSchool(option.dataset.schoolChoice);
+      });
+      schoolDialog.addEventListener("click", event => { if (event.target === schoolDialog) schoolDialog.close(); });
+      nicknameInput.addEventListener("input", () => {
+        window.clearTimeout(nicknameCheckTimer); nicknameCheckRequest++;
+        const value = nicknameInput.value.trim();
+        if (!value) { setNicknameCheck("별명은 전국 리그에서 중복될 수 없어요.", ""); return; }
+        if (value.length > 20) { setNicknameCheck("별명은 1~20자로 입력해주세요.", "error"); return; }
+        setNicknameCheck("별명 중복 확인 중…", "pending");
+        nicknameCheckTimer = window.setTimeout(() => checkNicknameAvailability(value), 450);
+      });
+      nicknameInput.addEventListener("blur", () => {
+        window.clearTimeout(nicknameCheckTimer);
+        const value = nicknameInput.value.trim();
+        if (value.length >= 1 && value.length <= 20) checkNicknameAvailability(value);
+      });
+      document.getElementById("join-form").addEventListener("submit", event => {
+        event.preventDefault();
+        runAction(async () => {
+          if (!remoteClient || !hasKakaoIdentity(authUser)) throw new Error("카카오 로그인 후 참가해주세요.");
+          const nickname = nicknameInput.value.trim();
+          const school = state.profile ? state.profile.school : document.getElementById("school").value.trim();
+          if (!nickname || nickname.length > 20) throw new Error("별명은 1~20자로 입력해주세요.");
+          if (school.length < 2 || school.length > 80) throw new Error("참가할 학교를 선택해주세요.");
+          if (!await checkNicknameAvailability(nickname, authUser)) throw new Error("별명 중복 확인을 완료해주세요.");
+          const result = await remoteClient.rpc("join_campus_league", { p_nickname:nickname, p_school_name:school });
+          if (result.error) throw result.error;
+          editingProfile = false;
+          await refreshRemotePortfolio();
+          toast("참가 정보를 저장했어요.");
+        });
+      });
+      document.getElementById("auth-gate-kakao").addEventListener("click", connectKakaoAccount);
+      document.getElementById("auth-signout").addEventListener("click", async () => {
+        if (!remoteClient) return;
+        const { error } = await remoteClient.auth.signOut();
+        if (error) toast(error.message || "로그아웃에 실패했어요.");
+      });
+      document.getElementById("edit-profile").addEventListener("click", () => {
+        if (!state.profile) return;
+        editingProfile = !editingProfile;
+        nicknameInput.value = state.profile.nickname;
+        chooseSchool(state.profile.school);
+        document.getElementById("open-school-picker").disabled = true;
+        document.querySelector("#join-form button[type=submit]").textContent = "별명 저장";
+        render(); nicknameInput.focus();
+      });
+      document.getElementById("exchange-direction").addEventListener("change", () => {
+        const toKrw=document.getElementById("exchange-direction").value === "USD_KRW";
+        const input=document.getElementById("exchange-amount"); input.value=""; input.min=toKrw?"0.01":"1000"; input.step=toKrw?"0.0001":"1";
+        input.placeholder=toKrw?"환전할 달러":"환전할 원화"; input.setAttribute("aria-label",input.placeholder);
+        document.getElementById("exchange-submit").textContent=toKrw?"원화로 환전":"USD로 환전"; render();
+      });
+      [["loan-borrow","borrow"],["loan-repay","repay"],["loan-repay-all","repay_all"]].forEach(([id,side]) => {
+        document.getElementById(id).addEventListener("click", () => runAction(async () => {
+          const amount=side==="repay_all"?0:Number(document.getElementById("loan-amount").value);
+          if (side!=="repay_all" && (!Number.isSafeInteger(amount) || amount<1)) throw new Error("금액을 1원 이상 정수로 입력해주세요.");
+          await submitAction("loan",{side,amount}); document.getElementById("loan-amount").value="";
+          toast(side==="borrow"?"가상 대출금이 원화로 입금됐어요.":"대출 상환이 완료됐어요.");
+          try { await refreshRemotePortfolio(); } catch { setConnectionMessage("요청은 처리됐지만 잔액을 불러오지 못했어요. 잠시 후 갱신됩니다."); }
+        }));
+      });
+      document.getElementById("exchange-form").addEventListener("submit", event => {
+        event.preventDefault();
+        runAction(async () => {
+          const amount = Number(document.getElementById("exchange-amount").value);
+          const direction=document.getElementById("exchange-direction").value;
+          if (direction==="KRW_USD" && (!Number.isInteger(amount) || amount<1000)) throw new Error("환전 금액을 1,000원 이상 정수로 입력해주세요.");
+          if (direction==="USD_KRW" && (!Number.isFinite(amount) || amount<0.01)) throw new Error("달러 금액을 0.01 이상 입력해주세요.");
+          await submitAction("exchange", { amount,direction });
+          document.getElementById("exchange-amount").value = "";
+          toast("환전이 완료됐어요.");
+          try { await refreshRemotePortfolio(); } catch { setConnectionMessage("환전은 완료됐지만 잔액을 불러오지 못했어요. 잠시 후 갱신됩니다."); }
+        });
+      });
+      document.getElementById("trade-submit").addEventListener("click", () => runAction(async () => {
+        const quantity = Number(document.getElementById("order-quantity").value);
+        if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100000) throw new Error("주문 수량은 1~100,000 사이 정수로 입력해주세요.");
+        await submitAction("order", { symbol:selectedAsset.symbol, side:selectedSide, quantity });
+        toast("주문이 체결됐어요.");
+        try { await refreshRemotePortfolio(); } catch { setConnectionMessage("주문은 체결됐지만 잔액을 불러오지 못했어요. 잠시 후 갱신됩니다."); }
+      }));
+      async function refreshRemotePortfolio() {
+        if (!remoteClient || !authUser) return;
+        const owner = authUser.id;
+        const { data,error } = await remoteClient.rpc("get_my_campus_portfolio");
+        if (owner !== authUser?.id) return;
+        if (error) throw error;
+        applyRemotePortfolio(data);
+      }
+      async function refreshRemoteOverview() {
+        if (overviewRequest) return overviewRequest;
+        overviewRequest = (async () => {
+          try {
+            const response = await fetch(QUOTE_WORKER_URL + "/overview", { signal:AbortSignal.timeout(12000) });
+            if (!response.ok) throw new Error("overview_unavailable");
+            const data = await response.json();
+            applyRemoteOverview(data);
+            setConnectionMessage(data.stale ? "연결을 복구하고 있어요. 마지막 확인한 순위와 가격을 표시합니다." : "");
+          } catch (error) { setConnectionMessage("연결이 지연되고 있어요. 마지막 확인한 정보를 표시합니다."); throw error; }
+          finally { overviewRequest = null; }
+        })();
+        return overviewRequest;
+      }
+      function applyRemoteOverview(data) {
+        if (!data || !Array.isArray(data.quotes)) return;
+        data.quotes = data.quotes.map(q => {
+          const previous = remoteSummary?.quotes?.find(p => p.symbol === q.symbol);
+          return previous && (Date.parse(previous.as_of) > Date.parse(q.as_of) || (previous.stale && previous.as_of === q.as_of)) ? previous : q;
+        });
+        remoteSummary = data;
+        if (!popularityChosen) activePopularity = (data.popular_stocks || []).some(p => Number(p.holder_count)>0) ? "holders"
+          : (data.popular_stocks || []).some(p => Number(p.search_count)>0) ? "searches" : "holders";
+        if (data.popular_stocks?.length && !popularNamesLoading && (!stockCatalog.KR || !stockCatalog.US)) {
+          popularNamesLoading = true;
+          ensureStockCatalog("ALL").then(() => { syncRemoteQuoteAssets(); render(); }).catch(() => {}).finally(() => { popularNamesLoading = false; });
+        }
+        remoteMode = true;
+        syncRemoteQuoteAssets();
+        (data.quotes || []).forEach(quote => {
+          if (quote.symbol === "USD/KRW") USDKRW = Number(quote.price);
+          const asset = assets.find(item => item.symbol === quote.symbol);
+          if (asset) { asset.price = Number(quote.price); asset.change = Number(quote.change_pct); asset.freshness = quote.freshness; asset.tradable = quote.is_tradable; asset.asOf = quote.as_of || null; }
+          if (quote.symbol === "USD/KRW") { fxFreshness = quote.freshness; fxTradable = quote.is_tradable; fxAsOf = quote.as_of; }
+        });
+        render();
+      }
+      function applyRemotePortfolio(data) {
+        if (!data || !data.profile) { window.CampusLeague.clearLocalDemo(); return; }
+        state.loan = data.loan ? {...data.loan,received_at:Date.now()} : null;
+        state.holdings = data.holdings || [];
+        state.profile = { nickname:data.profile.nickname, school:data.profile.school };
+        state.wallet = { krw:Number(data.wallet.cash_krw), usd:Number(data.wallet.cash_usd) };
+        state.trades = (data.trades || []).map(t => ({ symbol:t.symbol, side:t.side, quantity:Number(t.quantity), price:Number(t.price), currency:t.currency, at:t.created_at })).reverse();
+        state.holdings.forEach(h => {
+          if (!assets.some(a => a.symbol === h.symbol)) registerQuoteAsset({ ...h, market:h.currency === "USD" ? "US" : "KR", freshness:"delayed", is_tradable:false, as_of:null });
+        });
+        syncRemoteQuoteAssets();
+        USDKRW = Number(data.fx_krw || USDKRW);
+        remoteMode = true;
+        saveState();
+        render();
+        document.getElementById("profile-school").textContent = state.profile.school;
+      }
+      window.CampusLeague = {
+        setClient(client) { remoteClient = client; remoteMode = true; updateAuthGate(); },
+        setAuthUser(user) {
+          if (authUser?.id !== user?.id) { state = {profile:null,wallet:{krw:STARTING_CAPITAL,usd:0},trades:[],holdings:[],loan:null}; editingProfile=false; document.getElementById("open-school-picker").disabled=false; }
+          authUser = user || null; authGateMessage = ""; render();
+        },
+        setConnectionMessage,
+        setAuthGateError(message) { authGateMessage = message || ""; updateAuthGate(); },
+        refreshRemoteOverview,
+        refreshRemotePortfolio,
+        applyRemoteOverview,
+        applyRemotePortfolio,
+        clearLocalDemo() {
+          state = { profile:null, wallet:{ krw:STARTING_CAPITAL, usd:0 }, trades:[], holdings:[], loan:null, joinedAt:null };
+          try { localStorage.removeItem(STORAGE_KEY); } catch {}
+          remoteMode = true;
+          render();
+        }
+      };
+      render();
+    })();
+  </script>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+    const app = window.CampusLeague;
+    const config = window.UNIVERSE2_CONFIG || {};
+    const isConfigured = /^https:\/\/[a-z0-9]+\.supabase\.co$/i.test(config.supabaseUrl || "")
+      && !String(config.supabaseUrl || "").includes("YOUR_PROJECT_REF")
+      && /^sb_publishable_[A-Za-z0-9_-]+$/.test(config.supabasePublishableKey || "")
+      && config.supabasePublishableKey !== "sb_publishable_REPLACE_WITH_YOUR_KEY"
+      && /^https:\/\//.test(config.quoteWorkerUrl || "");
+    if (!isConfigured) {
+      app.setAuthGateError("Universe 2의 Supabase와 가상 시세 Worker 설정을 완료하면 참가할 수 있어요. 저장소의 설정 안내를 확인해주세요.");
+    } else {
+    const client = createClient(
+      config.supabaseUrl,
+      config.supabasePublishableKey,
+      { auth:{ autoRefreshToken:true, persistSession:true, detectSessionInUrl:true }, global:{ fetch:(url,options) => fetch(url,{...options,signal:options?.signal || AbortSignal.timeout(15000)}) } }
+    );
+    app.setClient(client);
+    let refreshBusy = false, timer, failures = 0, lastPortfolio = 0;
+    client.auth.onAuthStateChange((_event, session) => {
+      app.setAuthUser(session?.user || null);
+      lastPortfolio = 0;
+      setTimeout(refresh, 0);
+    });
+    async function refresh() {
+      clearTimeout(timer);
+      if (refreshBusy || document.hidden) return;
+      refreshBusy = true;
+      try {
+        if (!navigator.onLine) throw new Error("offline");
+        await app.refreshRemoteOverview();
+        if (Date.now() - lastPortfolio >= 60000) { await app.refreshRemotePortfolio(); lastPortfolio = Date.now(); }
+        failures = 0;
+      } catch { failures++; app.setConnectionMessage(navigator.onLine ? "연결을 복구하고 있어요. 마지막 확인한 정보를 표시합니다." : "인터넷 연결이 끊겼어요. 연결되면 자동으로 갱신합니다."); }
+      finally {
+        refreshBusy = false;
+        timer = setTimeout(refresh, Math.min(120000, 30000 * 2 ** failures) + Math.random() * 5000);
+      }
+    }
+    document.addEventListener("visibilitychange", () => { if (document.hidden) clearTimeout(timer); else refresh(); });
+    window.addEventListener("online", refresh);
+    window.addEventListener("offline", () => app.setConnectionMessage("인터넷 연결이 끊겼어요. 연결되면 자동으로 갱신합니다."));
+    refresh();
+    }
+  </script>
+</body>
+</html>

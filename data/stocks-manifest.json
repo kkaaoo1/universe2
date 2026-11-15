@@ -1,0 +1,18 @@
+{
+  "generated_at": "2026-11-15T05:30:21.683846+00:00",
+  "markets": {
+    "KR": {
+      "count": 12,
+      "files": [
+        "stocks-kr-01.tsv"
+      ]
+    },
+    "US": {
+      "count": 12,
+      "files": [
+        "stocks-us-01.tsv"
+      ]
+    }
+  },
+  "source": "Universe 2 fictional companies"
+}

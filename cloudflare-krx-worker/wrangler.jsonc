@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "universe2-simulated-market",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-14",
+  "workers_dev": true,
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "SIMULATION_MARKET", "class_name": "SimulationMarket" }
+    ],
+    "code_update_strategy": {
+      "mode": "immediate"
+    }
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["SimulationMarket"] }
+  ]
+}

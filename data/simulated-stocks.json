@@ -1,0 +1,32 @@
+{
+  "markets": {
+    "KR": [
+      { "symbol": "V2K001", "name": "미르에너지", "english_name": "Mireu Energy", "exchange": "KOSPI", "exchange_name": "가상 한국 시장", "currency": "KRW" },
+      { "symbol": "V2K002", "name": "별빛바이오", "english_name": "Starlight Bio", "exchange": "KOSDAQ", "exchange_name": "가상 한국 시장", "currency": "KRW" },
+      { "symbol": "V2K003", "name": "달무리모빌리티", "english_name": "Moonhalo Mobility", "exchange": "KOSPI", "exchange_name": "가상 한국 시장", "currency": "KRW" },
+      { "symbol": "V2K004", "name": "청해로보틱스", "english_name": "Blue Sea Robotics", "exchange": "KOSDAQ", "exchange_name": "가상 한국 시장", "currency": "KRW" },
+      { "symbol": "V2K005", "name": "온누리칩스", "english_name": "Onnuri Chips", "exchange": "KOSPI", "exchange_name": "가상 한국 시장", "currency": "KRW" },
+      { "symbol": "V2K006", "name": "새벽푸드", "english_name": "Dawn Foods", "exchange": "KOSPI", "exchange_name": "가상 한국 시장", "currency": "KRW" },
+      { "symbol": "V2K007", "name": "파도물류", "english_name": "Tideway Logistics", "exchange": "KOSDAQ", "exchange_name": "가상 한국 시장", "currency": "KRW" },
+      { "symbol": "V2K008", "name": "나래항공", "english_name": "Narae Air", "exchange": "KOSPI", "exchange_name": "가상 한국 시장", "currency": "KRW" },
+      { "symbol": "V2K009", "name": "한울건설", "english_name": "Hanul Construction", "exchange": "KOSPI", "exchange_name": "가상 한국 시장", "currency": "KRW" },
+      { "symbol": "V2K010", "name": "자운클라우드", "english_name": "Jaun Cloud", "exchange": "KOSDAQ", "exchange_name": "가상 한국 시장", "currency": "KRW" },
+      { "symbol": "V2K011", "name": "모래시계게임즈", "english_name": "Hourglass Games", "exchange": "KOSDAQ", "exchange_name": "가상 한국 시장", "currency": "KRW" },
+      { "symbol": "V2K012", "name": "무지개소재", "english_name": "Rainbow Materials", "exchange": "KOSPI", "exchange_name": "가상 한국 시장", "currency": "KRW" }
+    ],
+    "US": [
+      { "symbol": "V2U001", "name": "Lumen Orbit", "english_name": "Lumen Orbit", "exchange": "NAS", "exchange_name": "Universe Exchange", "currency": "USD" },
+      { "symbol": "V2U002", "name": "Northstar Bio", "english_name": "Northstar Bio", "exchange": "NAS", "exchange_name": "Universe Exchange", "currency": "USD" },
+      { "symbol": "V2U003", "name": "Copperfield Mobility", "english_name": "Copperfield Mobility", "exchange": "NYS", "exchange_name": "Universe Exchange", "currency": "USD" },
+      { "symbol": "V2U004", "name": "Bluehaven Robotics", "english_name": "Bluehaven Robotics", "exchange": "NAS", "exchange_name": "Universe Exchange", "currency": "USD" },
+      { "symbol": "V2U005", "name": "Juniper Cloud", "english_name": "Juniper Cloud", "exchange": "NAS", "exchange_name": "Universe Exchange", "currency": "USD" },
+      { "symbol": "V2U006", "name": "Redwood Foods", "english_name": "Redwood Foods", "exchange": "NYS", "exchange_name": "Universe Exchange", "currency": "USD" },
+      { "symbol": "V2U007", "name": "Tidal Freight", "english_name": "Tidal Freight", "exchange": "NYS", "exchange_name": "Universe Exchange", "currency": "USD" },
+      { "symbol": "V2U008", "name": "Aster Aerospace", "english_name": "Aster Aerospace", "exchange": "NAS", "exchange_name": "Universe Exchange", "currency": "USD" },
+      { "symbol": "V2U009", "name": "Cinderstone Homes", "english_name": "Cinderstone Homes", "exchange": "NYS", "exchange_name": "Universe Exchange", "currency": "USD" },
+      { "symbol": "V2U010", "name": "Daybreak Games", "english_name": "Daybreak Games", "exchange": "NAS", "exchange_name": "Universe Exchange", "currency": "USD" },
+      { "symbol": "V2U011", "name": "Mosaic Materials", "english_name": "Mosaic Materials", "exchange": "NYS", "exchange_name": "Universe Exchange", "currency": "USD" },
+      { "symbol": "V2U012", "name": "Silverline Transit", "english_name": "Silverline Transit", "exchange": "NAS", "exchange_name": "Universe Exchange", "currency": "USD" }
+    ]
+  }
+}
