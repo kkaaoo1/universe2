@@ -14,15 +14,15 @@ GitHub Pages is configured to use the GitHub Actions source. The Pages workflow 
 
 ## One-time setup
 
-1. Create a separate Supabase project for Universe 2. In its SQL Editor, run the full `campus_league_setup.sql` file once.
-2. Enable Kakao in **Authentication → Sign In / Providers**. Use your Kakao REST API key as Client ID and the Kakao Client Secret as Client Secret. Add the new Supabase callback URL (`https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`) to the Kakao app's Redirect URI list; keep the callback used by the original site.
-3. In Supabase **Authentication → URL Configuration**, set the Site URL and Redirect URL to `https://kkaaoo1.github.io/universe2/`.
-4. Edit `config.js` with the new project's URL and publishable key. The publishable key is designed for browser use; never place a Supabase secret key in this file.
-5. Connect a new Cloudflare Worker to this repository. Set its root directory to `cloudflare-krx-worker` and its deploy command to `npx wrangler deploy`. The Worker name is `universe2-simulated-market`.
-6. In the new Worker settings, add `SUPABASE_URL` as a variable and `SUPABASE_SECRET_KEY` as a secret. Use the new Universe 2 project values. Do not change the existing `campus-league-krx-feed` Worker.
-7. After Pages and the Worker deploy, open the Pages site and sign in with Kakao. Worker `/health` should report `configured: true` and `asset_count: 24`.
+1. In the separate Universe 2 Supabase project, run `campus_league_setup.sql` once in SQL Editor.
+2. In Kakao Developers, keep Kakao Login ON and add this Redirect URI to the REST API key's Kakao Login settings: `https://wcqgacolikxuhquhplyu.supabase.co/auth/v1/callback`. Use the REST API key for Supabase's Kakao Client ID and the Kakao Login Client Secret for Client Secret; do not use the Native App key.
+3. Request only the Kakao `profile_nickname` scope. Do not request `account_email` or `profile_image`. In Supabase **Authentication → Providers → Kakao**, enable Kakao, enter those two credentials, and enable **Allow users without an email**.
+4. In Supabase **Authentication → URL Configuration**, set Site URL to `https://kkaaoo1.github.io/universe2/` and add that URL to the allowed Redirect URLs.
+5. `config.js` already contains this project's URL and browser-safe publishable key. Never put a Supabase secret key in `config.js` or any other browser code.
+6. The fictional market Worker is `universe2-simulated-market` at `https://universe2-simulated-market.sdm3894.workers.dev`. Its `SUPABASE_URL` is already configured. In Cloudflare **Workers & Pages → universe2-simulated-market → Settings → Variables and Secrets**, add `SUPABASE_SECRET_KEY` as a **Secret** using the new project's `sb_secret_...` key, then deploy the setting. Do not change the existing `campus-league-krx-feed` Worker.
+7. Open `https://universe2-simulated-market.sdm3894.workers.dev/health`. It should report `configured: true` and `asset_count: 24` after the secret is saved. Then use the Pages site and sign in with Kakao.
 
-This setup intentionally keeps the new league's data separate. Until the new Supabase project and Worker secrets are configured, the public page shows a setup notice and trading stays unavailable.
+This setup intentionally keeps the new league's data separate. Until the Kakao provider and Worker secret are configured, the public page may show a setup notice and online trading stays unavailable.
 
 ## Game rules
 
